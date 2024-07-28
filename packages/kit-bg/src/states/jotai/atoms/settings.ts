@@ -45,8 +45,8 @@ export const settingsAtomInitialValue: ISettingsPersistAtom = {
   inscriptionProtection: true,
   hardwareConnectSrc: EOnekeyDomain.ONEKEY_SO,
   currencyInfo: {
-    id: 'usd',
-    symbol: '$',
+    id: 'idr',
+    symbol: 'Rp',
   },
 };
 export const { target: settingsPersistAtom, use: useSettingsPersistAtom } =

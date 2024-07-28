@@ -14,7 +14,11 @@ import {
 } from '@onekeyhq/kit/src/states/jotai/contexts/tokenList';
 import { ETranslations } from '@onekeyhq/shared/src/locale';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
-import { EModalRoutes, EModalSettingRoutes } from '@onekeyhq/shared/src/routes';
+import {
+  EModalRoutes,
+  EModalSendRoutes,
+  EModalSettingRoutes,
+} from '@onekeyhq/shared/src/routes';
 import { EAccountSelectorSceneName } from '@onekeyhq/shared/types';
 
 import backgroundApiProxy from '../../background/instance/backgroundApiProxy';
@@ -23,6 +27,8 @@ import { UrlAccountNavHeader } from '../../views/Home/pages/urlAccount/UrlAccoun
 import useScanQrCode from '../../views/ScanQrCode/hooks/useScanQrCode';
 
 import { UniversalSearchInput } from './UniversalSearchInput';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../states/jotai/myAccountAtom';
 
 export function HeaderRight({
   sceneName,
@@ -32,8 +38,10 @@ export function HeaderRight({
   const intl = useIntl();
   const navigation = useAppNavigation();
   const scanQrCode = useScanQrCode();
+  const myAccount = useAtom(myAccountAtom);
+
   const {
-    activeAccount: { account },
+    activeAccount: { account, network },
   } = useActiveAccount({ num: 0 });
   const [allTokens] = useAllTokenListAtom();
   const [map] = useAllTokenListMapAtom();
@@ -42,20 +50,42 @@ export function HeaderRight({
       screen: EModalSettingRoutes.SettingListModal,
     });
   }, [navigation]);
-  const onScanButtonPressed = useCallback(
-    () =>
-      scanQrCode.start({
-        handlers: scanQrCode.PARSE_HANDLER_NAMES.all,
-        autoHandleResult: true,
-        account,
-        tokens: {
-          data: allTokens.tokens,
-          keys: allTokens.keys,
-          map,
+  const onScanButtonPressed = useCallback(async () => {
+    const result = await scanQrCode.start({
+      handlers: scanQrCode.PARSE_HANDLER_NAMES.all,
+      autoHandleResult: true,
+      account,
+      tokens: {
+        data: allTokens.tokens,
+        keys: allTokens.keys,
+        map,
+      },
+    });
+    console.log('REE', result);
+    if (typeof result?.data === 'string') {
+      navigation.pushModal(EModalRoutes.SendModal, {
+        screen: EModalSendRoutes.SendDataInput,
+        params: {
+          accountId: myAccount?.address,
+          networkId: network?.id,
+          isNFT: false,
+          address: result?.data,
+          token: {
+            '$key':
+              'evm--170845_0x42e19b59fa5632c01b87666a400a002a695251d2_0x0000000000000000000000000000000000000000',
+            'address': '0x0000000000000000000000000000000000000000',
+            'decimals': 6,
+            'isNative': false,
+            'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
+            'name': 'ETH',
+            'riskLevel': 1,
+            'symbol': 'ETH',
+            'totalSupply': '',
+          },
         },
-      }),
-    [scanQrCode, account, allTokens, map],
-  );
+      });
+    }
+  }, [scanQrCode, account, allTokens, map]);
 
   const openExtensionExpandTab = useCallback(async () => {
     await backgroundApiProxy.serviceApp.openExtensionExpandTab({

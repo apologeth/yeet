@@ -77,7 +77,7 @@ jobs:
         with:
           versionCode: ${{ env.BUILD_NUMBER }}
           versionName: ${{ steps.dotenv.outputs.version }}
-          packageName: 'so.onekey.app.wallet'
+          packageName: 'com.langitwallet.app'
           android_dir: ./apps/mobile
 
       - name: Write .env.version

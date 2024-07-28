@@ -24,7 +24,7 @@ function TabSubStackNavigator({
   const [bgColor, titleColor] = useThemeValue(['bgApp', 'text']);
   const intl = useIntl();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator detachInactiveScreens={false}>
       {config
         .filter(({ disable }) => !disable)
         .map(({ name, component, translationId, headerShown = true }) => (
@@ -114,12 +114,13 @@ export function TabStackNavigator<RouteName extends string>({
   return (
     <Tab.Navigator
       tabBar={tabBarCallback}
+      detachInactiveScreens={false}
       screenOptions={{
         headerShown: false,
         freezeOnBlur: true,
         // Native Load all tabs at once
         // Web Lazy load
-        lazy: !platformEnv.isNative,
+        // lazy: !platformEnv.isNative,
       }}
     >
       {tabScreens}

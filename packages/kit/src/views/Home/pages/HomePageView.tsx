@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useIntl } from 'react-intl';
-import { Animated, Easing } from 'react-native';
+import { Animated, Easing, Text } from 'react-native';
 
 import { Empty, Page, Stack, Tab, YStack } from '@onekeyhq/components';
 import { getEnabledNFTNetworkIds } from '@onekeyhq/shared/src/engine/engineConsts';
@@ -23,6 +23,8 @@ import { NFTListContainerWithProvider } from './NFTListContainer';
 import { TokenListContainerWithProvider } from './TokenListContainer';
 import { TxHistoryListContainerWithProvider } from './TxHistoryContainer';
 import WalletContentWithAuth from './WalletContentWithAuth';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
 
 let CONTENT_ITEM_WIDTH: Animated.Value | undefined;
 
@@ -61,6 +63,8 @@ export function HomePageView({
       device,
     },
   } = useActiveAccount({ num: 0 });
+
+  const [myAccount, setMyAccount] = useAtom(myAccountAtom);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const addressType = deriveInfo?.labelKey
@@ -152,7 +156,7 @@ export function HomePageView({
       );
     }
 
-    if (!account) {
+    if (!myAccount?.address) {
       return (
         <YStack height="100%">
           <HomeSelector padding="$5" />
@@ -172,6 +176,7 @@ export function HomePageView({
         </YStack>
       );
     }
+
     if (isRequiredValidation) {
       return (
         <WalletContentWithAuth
@@ -196,6 +201,7 @@ export function HomePageView({
     deriveInfo?.labelKey,
     deriveInfo?.label,
     intl,
+    myAccount,
   ]);
 
   const renderHomePage = useCallback(() => {
@@ -206,8 +212,7 @@ export function HomePageView({
         <EmptyWallet />
       </Stack>
     );
-
-    if (wallet) {
+    if (myAccount?.address) {
       content = renderHomePageContent();
       // This is a temporary hack solution, need to fix the layout of headerLeft and headerRight
     }

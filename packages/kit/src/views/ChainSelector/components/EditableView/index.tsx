@@ -8,6 +8,7 @@ import {
   SectionList,
   SortableSectionList,
   Stack,
+  View,
 } from '@onekeyhq/components';
 import type { ISortableSectionListRef } from '@onekeyhq/components';
 import { ListItem } from '@onekeyhq/kit/src/components/ListItem';
@@ -19,6 +20,7 @@ import type { IServerNetwork } from '@onekeyhq/shared/types';
 import { networkFuseSearch } from '../../utils';
 
 import type { IServerNetworkMatch } from '../../types';
+import { FlatList } from 'react-native';
 
 type IEditableViewContext = {
   isEditMode?: boolean;
@@ -168,10 +170,19 @@ export const EditableView: FC<IEditableViewProps> = ({
 
       return result;
     }, {} as Record<string, IServerNetwork[]>);
+
     const sectionList = Object.entries(data)
       .map(([key, value]) => ({ title: key, data: value }))
       .sort((a, b) => a.title.charCodeAt(0) - b.title.charCodeAt(0));
     return [{ data: topNetworks }, ...sectionList];
+  }, [allNetworks, trimSearchText, topNetworks]);
+
+  const realData = useMemo(() => {
+    if (trimSearchText) {
+      const data = networkFuseSearch(allNetworks, trimSearchText);
+      return data.length === 0 ? [] : data;
+    }
+    return allNetworks;
   }, [allNetworks, trimSearchText, topNetworks]);
 
   const hasScrollToSelectedCell = useRef(false);
@@ -264,8 +275,8 @@ export const EditableView: FC<IEditableViewProps> = ({
             onChangeText={(text) => setSearchText(text.trim())}
           />
         </Stack>
-        <Stack flex={1}>
-          <SortableSectionList
+        <Stack flex={1} mt={24}>
+          {/* <SortableSectionList
             // @ts-ignore
             ref={scrollView}
             enabled={isEditMode}
@@ -281,6 +292,14 @@ export const EditableView: FC<IEditableViewProps> = ({
             })}
             renderSectionHeader={renderSectionHeader}
             ListFooterComponent={<Stack h="$2" />} // Act as padding bottom
+          /> */}
+          <FlatList
+            data={realData}
+            keyExtractor={(item) => (item as IServerNetwork).id}
+            renderItem={renderItem}
+            ItemSeparatorComponent={() => (
+              <View style={{ marginVertical: 4 }} />
+            )}
           />
         </Stack>
       </Stack>

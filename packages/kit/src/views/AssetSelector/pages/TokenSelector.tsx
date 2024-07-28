@@ -22,6 +22,8 @@ import type { IToken } from '@onekeyhq/shared/types/token';
 
 import type { RouteProp } from '@react-navigation/core';
 import type { TextInputFocusEventData } from 'react-native';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
 
 function TokenSelector() {
   const intl = useIntl();
@@ -33,6 +35,7 @@ function TokenSelector() {
   } = useTokenListActions().current;
 
   const [tokenList] = useTokenListAtom();
+  const [myAccount] = useAtom(myAccountAtom);
 
   const route =
     useRoute<
@@ -62,11 +65,12 @@ function TokenSelector() {
 
   const fetchAccountTokens = useCallback(async () => {
     updateTokenListState({ initialized: false, isRefreshing: true });
-    const accountAddress =
-      await backgroundApiProxy.serviceAccount.getAccountAddressForApi({
-        accountId,
-        networkId,
-      });
+    const accountAddress = myAccount?.address;
+    // const accountAddress =
+    //   await backgroundApiProxy.serviceAccount.getAccountAddressForApi({
+    //     accountId,
+    //     networkId,
+    //   });
 
     const r = await backgroundApiProxy.serviceToken.fetchAccountTokens({
       networkId,
@@ -74,6 +78,7 @@ function TokenSelector() {
       mergeTokens: true,
       flag: 'token-selector',
     });
+
     const { allTokens } = r;
     if (!allTokens) {
       updateTokenListState({ isRefreshing: false });
@@ -93,6 +98,7 @@ function TokenSelector() {
     refreshTokenListMap(allTokens.map);
     updateTokenListState({ initialized: true, isRefreshing: false });
   }, [
+    myAccount,
     accountId,
     networkId,
     refreshTokenList,

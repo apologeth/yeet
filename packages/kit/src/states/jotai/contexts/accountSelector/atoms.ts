@@ -125,6 +125,8 @@ export interface IAccountSelectorActiveAccountInfo {
   deriveInfoItems: IAccountDeriveInfoItems[];
   canCreateAddress?: boolean;
   isNetworkNotMatched?: boolean;
+  imageUrl: string;
+  idToken: string;
 }
 export const defaultActiveAccountInfo: () => IAccountSelectorActiveAccountInfo =
   () => ({
@@ -138,6 +140,8 @@ export const defaultActiveAccountInfo: () => IAccountSelectorActiveAccountInfo =
     deriveType: 'default',
     deriveInfoItems: [],
     ready: false,
+    imageUrl: '',
+    idToken: '',
   });
 export const { atom: activeAccountsAtom, use: useActiveAccountsAtom } =
   contextAtom<Partial<{ [num: number]: IAccountSelectorActiveAccountInfo }>>({

@@ -21,6 +21,8 @@ import {
 } from '../../states/jotai/contexts/accountSelector';
 
 import { AccountSelectorCreateAddressButton } from './AccountSelectorCreateAddressButton';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../states/jotai/myAccountAtom';
 
 export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
   const intl = useIntl();
@@ -29,6 +31,8 @@ export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
   const { account, wallet, network, deriveType, deriveInfo } = activeAccount;
 
   const { selectedAccount } = useSelectedAccount({ num });
+  const [myAccount, setMyAccount] = useAtom(myAccountAtom);
+
 
   const navigation =
     useAppNavigation<IPageNavigationProp<IModalReceiveParamList>>();
@@ -65,7 +69,7 @@ export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
         },
       });
     } else {
-      copyText(account.address);
+      copyText(myAccount?.address);
     }
     logActiveAccount();
   }, [
@@ -80,7 +84,7 @@ export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
   ]);
 
   // show address if account has an address
-  if (account?.address) {
+  if (myAccount?.address) {
     return (
       <Tooltip
         renderContent={intl.formatMessage({
@@ -118,7 +122,7 @@ export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
             userSelect="none"
           >
             <SizableText size="$bodyMd">
-              {accountUtils.shortenAddress({ address: account?.address })}
+              {accountUtils.shortenAddress({ address: myAccount?.address })}
             </SizableText>
           </XStack>
         }

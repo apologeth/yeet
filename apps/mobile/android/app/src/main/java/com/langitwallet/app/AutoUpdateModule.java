@@ -1,4 +1,4 @@
-package so.onekey.app.wallet;
+package com.langitwallet.app;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

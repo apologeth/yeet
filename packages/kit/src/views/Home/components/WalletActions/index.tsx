@@ -28,6 +28,8 @@ import { RawActions } from './RawActions';
 import { WalletActionBuy } from './WalletActionBuy';
 import { WalletActionMore } from './WalletActionMore';
 import { WalletActionReceive } from './WalletActionReceive';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../../states/jotai/myAccountAtom';
 
 function WalletActionSend() {
   const navigation =
@@ -40,6 +42,8 @@ function WalletActionSend() {
   const [map] = useAllTokenListMapAtom();
   const [tokenListState] = useTokenListStateAtom();
 
+  const [myAccount] = useAtom(myAccountAtom);
+
   const vaultSettings = usePromiseResult(async () => {
     const settings = await backgroundApiProxy.serviceNetwork.getVaultSettings({
       networkId: network?.id ?? '',
@@ -48,29 +52,31 @@ function WalletActionSend() {
   }, [network?.id]).result;
 
   const handleOnSend = useCallback(async () => {
-    if (!account || !network) return;
-    if (vaultSettings?.isSingleToken) {
-      const nativeToken = await backgroundApiProxy.serviceToken.getNativeToken({
-        networkId: network.id,
-        accountId: account.id,
-      });
-      navigation.pushModal(EModalRoutes.SendModal, {
-        screen: EModalSendRoutes.SendDataInput,
-        params: {
-          accountId: account.id,
-          networkId: network.id,
-          isNFT: false,
-          token: nativeToken,
-        },
-      });
-      return;
-    }
+    console.log(myAccount, '\n', network, '\n', allTokens);
+    if (!myAccount || !network) return;
+
+    // if (vaultSettings?.isSingleToken) {
+    //   const nativeToken = await backgroundApiProxy.serviceToken.getNativeToken({
+    //     networkId: network.id,
+    //     accountId: myAccount?.address,
+    //   });
+    //   navigation.pushModal(EModalRoutes.SendModal, {
+    //     screen: EModalSendRoutes.SendDataInput,
+    //     params: {
+    //       accountId: myAccount?.address,
+    //       networkId: network.id,
+    //       isNFT: false,
+    //       token: nativeToken,
+    //     },
+    //   });
+    //   return;
+    // }
 
     navigation.pushModal(EModalRoutes.AssetSelectorModal, {
       screen: EAssetSelectorRoutes.TokenSelector,
       params: {
         networkId: network.id,
-        accountId: account.id,
+        accountId: account?.id,
         networkName: network.name,
         tokens: {
           data: allTokens.tokens,
@@ -82,7 +88,7 @@ function WalletActionSend() {
           navigation.pushModal(EModalRoutes.SendModal, {
             screen: EModalSendRoutes.SendDataInput,
             params: {
-              accountId: account.id,
+              accountId: account?.id,
               networkId: network.id,
               isNFT: false,
               token,
@@ -92,6 +98,7 @@ function WalletActionSend() {
       },
     });
   }, [
+    myAccount,
     account,
     allTokens.keys,
     allTokens.tokens,
@@ -104,9 +111,9 @@ function WalletActionSend() {
   return (
     <RawActions.Send
       onPress={handleOnSend}
-      disabled={
-        vaultSettings?.disabledSendAction || !tokenListState.initialized
-      }
+      // disabled={
+      //   vaultSettings?.disabledSendAction || !tokenListState.initialized
+      // }
     />
   );
 }
@@ -141,9 +148,9 @@ function WalletActions({ ...rest }: IXStackProps) {
 
   return (
     <RawActions {...rest}>
-      <ReviewControl>
+      {/* <ReviewControl>
         <WalletActionBuy networkId={network?.id} accountId={account?.id} />
-      </ReviewControl>
+      </ReviewControl> */}
       <WalletActionSwap networkId={network?.id} />
       <WalletActionSend />
       <WalletActionReceive
@@ -153,7 +160,7 @@ function WalletActions({ ...rest }: IXStackProps) {
         deriveInfo={deriveInfo}
         deriveType={deriveType}
       />
-      <WalletActionMore />
+      {/* <WalletActionMore /> */}
     </RawActions>
   );
 }

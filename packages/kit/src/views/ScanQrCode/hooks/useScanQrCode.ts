@@ -14,15 +14,21 @@ import { EQRCodeHandlerType } from '@onekeyhq/kit-bg/src/services/ServiceScanQRC
 import { OneKeyErrorScanQrCodeCancel } from '@onekeyhq/shared/src/errors';
 import {
   EModalRoutes,
+  EModalSendRoutes,
   EScanQrCodeModalPages,
 } from '@onekeyhq/shared/src/routes';
 
 import useAppNavigation from '../../../hooks/useAppNavigation';
 
 import useParseQRCode from './useParseQRCode';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
+import { useActiveAccount } from '../../../states/jotai/contexts/accountSelector';
+import { useTokenListAtom } from '../../../states/jotai/contexts/tokenList';
 
 export default function useScanQrCode() {
   const navigation = useAppNavigation();
+
   const parseQRCode = useParseQRCode();
   const start = useCallback(
     ({
@@ -49,6 +55,7 @@ export default function useScanQrCode() {
                   account,
                   tokens,
                 });
+
                 if (parseValue.type === EQRCodeHandlerType.ANIMATION_CODE) {
                   const animationValue = parseValue.data as IAnimationValue;
                   if (animationValue.fullData) {
@@ -60,6 +67,7 @@ export default function useScanQrCode() {
                     progress: animationValue.progress,
                   };
                 }
+
                 resolve(parseValue);
                 return {};
               }

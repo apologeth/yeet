@@ -3,6 +3,7 @@ import type { IDeviceType } from '@onekeyfe/hd-core';
 
 export enum EOnboardingPages {
   GetStarted = 'GetStarted',
+  GetStartedRecovery = 'GetStartedRecovery',
 
   // v4 migration
   V4MigrationGetStarted = 'V4MigrationGetStarted',
@@ -39,6 +40,10 @@ export enum EOnboardingPages {
 export type IOnboardingParamList = {
   [EOnboardingPages.GetStarted]: {
     showCloseButton?: boolean;
+  };
+
+  [EOnboardingPages.GetStartedRecovery]: {
+    data?: any;
   };
 
   // v4 migration

@@ -32,6 +32,7 @@ import { useSendConfirm } from '@onekeyhq/kit/src/hooks/useSendConfirm';
 import {
   useAllTokenListAtom,
   useAllTokenListMapAtom,
+  useTokenListMapAtom,
 } from '@onekeyhq/kit/src/states/jotai/contexts/tokenList';
 import { getFormattedNumber } from '@onekeyhq/kit/src/utils/format';
 import { useSettingsPersistAtom } from '@onekeyhq/kit-bg/src/states/jotai/atoms';
@@ -99,6 +100,14 @@ function SendDataInputContainer() {
 
     return new BigNumber(1).shiftedBy(-tokenInfo.decimals).toFixed();
   }, [tokenInfo]);
+
+  const [tokenListMap] = useTokenListMapAtom();
+  const activeToken = useMemo(() => {
+    if (token) {
+      return map[token['$key']];
+    }
+    return '';
+  }, [token]);
 
   const {
     result: [
@@ -522,8 +531,8 @@ function SendDataInputContainer() {
     if (isUseFiat) {
       return tokenDetails?.fiatValue ?? '0';
     }
-    return tokenDetails?.balanceParsed ?? '0';
-  }, [isUseFiat, tokenDetails?.balanceParsed, tokenDetails?.fiatValue]);
+    return activeToken?.balanceParsed ?? '0';
+  }, [isUseFiat, tokenDetails?.balanceParsed, tokenDetails?.fiatValue, activeToken]);
 
   const renderTokenDataInputForm = useCallback(
     () => (

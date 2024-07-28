@@ -1,4 +1,4 @@
-package so.onekey.app.wallet;
+package com.langitwallet.app;
 
 import android.app.Application;
 import android.content.res.Configuration;

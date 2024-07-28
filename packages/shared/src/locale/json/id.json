@@ -1194,6 +1194,7 @@
   "settings.select_wallet": "Pilih dompet",
   "settings.settings": "Pengaturan",
   "settings.sign_text": "Teks tanda",
+  "settings.sign_up_with_google": "Masuk menggunakan Google",
   "settings.signature_record": "Rekaman tanda tangan",
   "settings.spend_dust_utxo": "Belanjakan debu UTXO",
   "settings.spend_dust_utxo_desc": "Menggunakan debu UTXO meningkatkan biaya transaksi dan mengurangi privasi. Disarankan untuk menonaktifkan fitur ini untuk menghindari pelacakan jahat.",

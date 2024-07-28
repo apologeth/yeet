@@ -5729,6 +5729,7 @@ __metadata:
     "@polkadot/extension-inject": "npm:0.46.6"
     "@polkadot/types": "npm:11.3.1"
     "@polkadot/util-crypto": "npm:12.6.1"
+    "@react-native-google-signin/google-signin": "npm:^12.2.1"
     "@substrate/txwrapper-polkadot": "npm:7.5.1"
     "@tamagui/animations-moti": "npm:1.79.19"
     "@tamagui/babel-plugin": "npm:1.79.19"
@@ -7999,6 +8000,23 @@ __metadata:
   version: 4.4.3
   resolution: "@react-native-community/slider@npm:4.4.3"
   checksum: 10/e0036f26fc11b38472381d26ba0b81f4e6e74ffe08297a4d8b0a9990d0d4788710410a75429bb20d4b0272b7a772cfad645577e8845e10d31cc8610f58ba5ea2
+  languageName: node
+  linkType: hard
+
+"@react-native-google-signin/google-signin@npm:^12.2.1":
+  version: 12.2.1
+  resolution: "@react-native-google-signin/google-signin@npm:12.2.1"
+  peerDependencies:
+    expo: ">=50.0.0"
+    react: "*"
+    react-dom: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10/00a9e93ab613951a3b39cb2bc57e24c0772a7829c3d104a8f22eb931a71646c02294dd770d1cfd153775fd125c4f14f21a7f9bc85a257d2cd13c60ec6bd1e68b
   languageName: node
   linkType: hard
 

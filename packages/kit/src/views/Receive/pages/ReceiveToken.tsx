@@ -36,6 +36,8 @@ import { useAccountData } from '../../../hooks/useAccountData';
 import { EAddressState } from '../types';
 
 import type { RouteProp } from '@react-navigation/core';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
 
 function ReceiveToken() {
   useDebugComponentRemountLog({
@@ -49,6 +51,8 @@ function ReceiveToken() {
 
   const { networkId, accountId, walletId, deriveInfo, deriveType } =
     route.params;
+
+  const [myAccount] = useAtom(myAccountAtom);
 
   const addressType = deriveInfo?.labelKey
     ? intl.formatMessage({
@@ -157,7 +161,7 @@ function ReceiveToken() {
   };
 
   const renderReceiveToken = useCallback(() => {
-    if (!account || !network || !wallet) return null;
+    if (!network) return null;
 
     return (
       <>
@@ -184,7 +188,7 @@ function ReceiveToken() {
           p="$4"
         >
           <QRCode
-            value={account.address}
+            value={myAccount?.address}
             logo={{
               uri: network.logoURI,
             }}
@@ -239,7 +243,7 @@ function ReceiveToken() {
               wordBreak: 'break-all',
             }}
           >
-            {account.address}
+            {myAccount?.address}
           </SizableText>
 
           {!isShowAddress ? (
@@ -271,6 +275,7 @@ function ReceiveToken() {
             </SizableText>
           </XStack>
         ) : null}
+
         {isDeviceWallet &&
         (addressState === EAddressState.Unverified ||
           addressState === EAddressState.Verifying) ? (
@@ -283,7 +288,7 @@ function ReceiveToken() {
           <Button
             mt="$5"
             icon="Copy1Outline"
-            onPress={() => copyText(account.address)}
+            onPress={() => copyText(myAccount?.address)}
           >
             {intl.formatMessage({
               id: ETranslations.global_copy_address,
@@ -293,6 +298,7 @@ function ReceiveToken() {
       </>
     );
   }, [
+    myAccount,
     account,
     addressState,
     addressType,

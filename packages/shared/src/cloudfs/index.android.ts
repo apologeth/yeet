@@ -1,4 +1,4 @@
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import axios from 'axios';
 import RNCloudFs from 'react-native-cloud-fs';
 
@@ -19,14 +19,15 @@ export function backupPlatform() {
 }
 
 export async function isAvailable(): Promise<boolean> {
-  try {
-    const hasPlayServices = await GoogleSignin.hasPlayServices({
-      showPlayServicesUpdateDialog: false,
-    });
-    return hasPlayServices;
-  } catch (e) {
-    return false;
-  }
+  // try {
+  //   // const hasPlayServices = await GoogleSignin.hasPlayServices({
+  //   //   showPlayServicesUpdateDialog: false,
+  //   // });
+  //   return true;
+  // } catch (e) {
+  //   return false;
+  // }
+  return Promise.resolve(false);
 }
 
 async function checkInternet() {
@@ -41,35 +42,35 @@ async function checkInternet() {
 export async function loginIfNeeded(
   showSignInDialog: boolean,
 ): Promise<boolean> {
-  const signedIn = await GoogleSignin.isSignedIn();
-  if (signedIn) {
-    try {
-      return await RNCloudFs.loginIfNeeded();
-    } catch (error) {
-      // debugLogger.cloudBackup.error(error);
-      return Promise.resolve(false);
-    }
-  } else if (showSignInDialog) {
-    if ((await checkInternet()) === false) {
-      throw new Error('NETWORK');
-    }
-    GoogleSignin.configure(GoogleSignInConfigure);
-    await GoogleSignin.signIn();
-    return RNCloudFs.loginIfNeeded();
-  }
+  // const signedIn = await GoogleSignin.isSignedIn();
+  // if (signedIn) {
+  //   try {
+  //     return await RNCloudFs.loginIfNeeded();
+  //   } catch (error) {
+  //     // debugLogger.cloudBackup.error(error);
+  //     return Promise.resolve(false);
+  //   }
+  // } else if (showSignInDialog) {
+  //   if ((await checkInternet()) === false) {
+  //     throw new Error('NETWORK');
+  //   }
+  //   GoogleSignin.configure(GoogleSignInConfigure);
+  //   await GoogleSignin.signIn();
+  //   return RNCloudFs.loginIfNeeded();
+  // }
   return Promise.resolve(false);
 }
 
 export async function logoutFromGoogleDrive(
   revokeAccess: boolean,
 ): Promise<boolean> {
-  if (platformEnv.isNativeAndroid) {
-    if (revokeAccess) {
-      await GoogleSignin.revokeAccess();
-    }
-    await GoogleSignin.signOut();
-    return RNCloudFs.logout();
-  }
+  // if (platformEnv.isNativeAndroid) {
+  //   if (revokeAccess) {
+  //     await GoogleSignin.revokeAccess();
+  //   }
+  //   await GoogleSignin.signOut();
+  //   return RNCloudFs.logout();
+  // }
   return Promise.resolve(true);
 }
 

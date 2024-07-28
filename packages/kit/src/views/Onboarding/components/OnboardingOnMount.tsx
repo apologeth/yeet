@@ -11,19 +11,25 @@ import timerUtils from '@onekeyhq/shared/src/utils/timerUtils';
 import backgroundApiProxy from '../../../background/instance/backgroundApiProxy';
 import useAppNavigation from '../../../hooks/useAppNavigation';
 import { useV4MigrationActions } from '../pages/V4Migration/hooks/useV4MigrationActions';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function OnboardingOnMountCmp() {
   const navigation = useAppNavigation();
   const v4migrationActions = useV4MigrationActions();
   const [, setV4MigrationPersistAtom] = useV4migrationPersistAtom();
+  const [myAccount] = useAtom(myAccountAtom);
 
   const checkOnboardingState = useCallback(
     async ({ checkingV4Migration }: { checkingV4Migration?: boolean } = {}) => {
       // if (!isFocused) {
       //   return;
       // }
+      console.log('TEST OnboardingOnMount', myAccount);
 
       console.log('OnboardingOnMount: call checkOnboardingState');
+
 
       try {
         if (checkingV4Migration) {
@@ -47,13 +53,13 @@ function OnboardingOnMountCmp() {
 
       const { isOnboardingDone } =
         await backgroundApiProxy.serviceOnboarding.isOnboardingDone();
-      if (!isOnboardingDone) {
+      if (!(await AsyncStorage.getItem('myAccounts'))) {
         navigation.pushFullModal(EModalRoutes.OnboardingModal, {
           screen: EOnboardingPages.GetStarted,
         });
       }
     },
-    [navigation, setV4MigrationPersistAtom, v4migrationActions],
+    [navigation, setV4MigrationPersistAtom, v4migrationActions, myAccount],
   );
 
   useEffect(() => {

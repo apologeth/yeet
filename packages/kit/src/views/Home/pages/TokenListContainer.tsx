@@ -30,6 +30,9 @@ import { useTokenListActions } from '../../../states/jotai/contexts/tokenList';
 import { HomeTokenListProviderMirror } from '../components/HomeTokenListProvider/HomeTokenListProviderMirror';
 import { UrlAccountHomeTokenListProviderMirror } from '../components/HomeTokenListProvider/UrlAccountHomeTokenListProviderMirror';
 import { WalletActions } from '../components/WalletActions';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
+import { ethers } from 'ethers';
 
 function TokenListContainer({
   showWalletActions = false,
@@ -42,6 +45,7 @@ function TokenListContainer({
   const {
     activeAccount: { account, network, wallet, deriveInfo, deriveType },
   } = useActiveAccount({ num: 0 });
+  const [myAccount] = useAtom(myAccountAtom);
 
   const { handleOnBuy, isSupported } = useBuyToken({
     accountId: account?.id ?? '',
@@ -75,53 +79,57 @@ function TokenListContainer({
   const { run } = usePromiseResult(
     async () => {
       try {
-        if (!account || !network) return;
+        if (!myAccount || !network) return;
 
         await backgroundApiProxy.serviceToken.abortFetchAccountTokens();
-        const accountAddress =
-          await backgroundApiProxy.serviceAccount.getAccountAddressForApi({
-            accountId: account.id,
-            networkId: network.id,
-          });
-        const blockedTokens =
-          await backgroundApiProxy.serviceToken.getBlockedTokens({
-            networkId: network.id,
-          });
-        const r = await backgroundApiProxy.serviceToken.fetchAccountTokens({
-          mergeTokens: true,
-          networkId: network.id,
-          accountAddress,
-          flag: 'home-token-list',
-          xpub: await backgroundApiProxy.serviceAccount.getAccountXpub({
-            accountId: account.id,
-            networkId: network.id,
-          }),
-          blockedTokens: Object.keys(blockedTokens),
-        });
+        const accountAddress = myAccount?.address;
+        // const accountAddress =
+        //   await backgroundApiProxy.serviceAccount.getAccountAddressForApi({
+        //     accountId: account.id,
+        //     networkId: network.id,
+        //   });
 
-        refreshTokenList({ keys: r.tokens.keys, tokens: r.tokens.data });
-        refreshTokenListMap(r.tokens.map);
-        refreshRiskyTokenList({
-          keys: r.riskTokens.keys,
-          riskyTokens: r.riskTokens.data,
-        });
-        refreshRiskyTokenListMap(r.riskTokens.map);
-        refreshSmallBalanceTokenList({
-          keys: r.smallBalanceTokens.keys,
-          smallBalanceTokens: r.smallBalanceTokens.data,
-        });
-        refreshSmallBalanceTokenListMap(r.smallBalanceTokens.map);
-        refreshSmallBalanceTokensFiatValue(
-          r.smallBalanceTokens.fiatValue ?? '0',
-        );
+        console.log('NETWORKK', network);
+        if (network?.chainId === '170845') {
+          const keys = '170845';
+          const provider = new ethers.providers.JsonRpcProvider(
+            'https://rpc-langit-testnet-9osqsm6ktp.t.conduit.xyz/',
+          );
 
-        if (r.allTokens) {
+          const balance = await provider.getBalance(accountAddress);
+          const stringBalance = ethers.utils.formatEther(balance);
+
+          const tokens = [
+            {
+              '$key':
+                'evm--170845_0x42e19b59fa5632c01b87666a400a002a695251d2_0x0000000000000000000000000000000000000000',
+              'address': '0x0000000000000000000000000000000000000000',
+              'decimals': 6,
+              'isNative': false,
+              'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
+              'name': 'ETH',
+              'riskLevel': 1,
+              'symbol': 'ETH',
+              'totalSupply': '',
+            },
+          ];
+
+          refreshTokenList({ keys, tokens });
           refreshAllTokenList({
-            keys: r.allTokens?.keys,
-            tokens: r.allTokens?.data,
+            keys,
+            tokens,
           });
-          refreshAllTokenListMap(r.allTokens.map);
-          const mergedTokens = r.allTokens.data;
+          refreshAllTokenListMap({
+            'evm--170845_0x42e19b59fa5632c01b87666a400a002a695251d2_0x0000000000000000000000000000000000000000':
+              {
+                'price': '0.0',
+                'price24h': '0',
+                'balance': '0',
+                'balanceParsed': stringBalance,
+                'fiatValue': '0',
+              },
+          });
+          const mergedTokens = tokens;
           if (mergedTokens && mergedTokens.length) {
             void backgroundApiProxy.serviceToken.updateLocalTokens({
               networkId: network.id,
@@ -132,6 +140,58 @@ function TokenListContainer({
             initialized: true,
             isRefreshing: false,
           });
+        } else {
+          const blockedTokens =
+            await backgroundApiProxy.serviceToken.getBlockedTokens({
+              networkId: network.id,
+            });
+
+          const r = await backgroundApiProxy.serviceToken.fetchAccountTokens({
+            mergeTokens: true,
+            networkId: network.id,
+            accountAddress,
+            flag: 'home-token-list',
+            // xpub: await backgroundApiProxy.serviceAccount.getAccountXpub({
+            //   accountId: account.id,
+            //   networkId: network.id,
+            // }),
+            blockedTokens: Object.keys(blockedTokens),
+          });
+
+          refreshTokenList({ keys: r.tokens.keys, tokens: r.tokens.data });
+          refreshTokenListMap(r.tokens.map);
+          refreshRiskyTokenList({
+            keys: r.riskTokens.keys,
+            riskyTokens: r.riskTokens.data,
+          });
+          refreshRiskyTokenListMap(r.riskTokens.map);
+          refreshSmallBalanceTokenList({
+            keys: r.smallBalanceTokens.keys,
+            smallBalanceTokens: r.smallBalanceTokens.data,
+          });
+          refreshSmallBalanceTokenListMap(r.smallBalanceTokens.map);
+          refreshSmallBalanceTokensFiatValue(
+            r.smallBalanceTokens.fiatValue ?? '0',
+          );
+
+          if (r.allTokens) {
+            refreshAllTokenList({
+              keys: r.allTokens?.keys,
+              tokens: r.allTokens?.data,
+            });
+            refreshAllTokenListMap(r.allTokens.map);
+            const mergedTokens = r.allTokens.data;
+            if (mergedTokens && mergedTokens.length) {
+              void backgroundApiProxy.serviceToken.updateLocalTokens({
+                networkId: network.id,
+                tokens: mergedTokens,
+              });
+            }
+            updateTokenListState({
+              initialized: true,
+              isRefreshing: false,
+            });
+          }
         }
       } catch (e) {
         if (e instanceof CanceledError) {
@@ -196,11 +256,12 @@ function TokenListContainer({
 
   const handleOnPressToken = useCallback(
     (token: IToken) => {
-      if (!account || !network || !wallet || !deriveInfo) return;
+      console.log(token, myAccount);
+      if (!myAccount || !network || !wallet || !deriveInfo) return;
       navigation.pushModal(EModalRoutes.MainModal, {
         screen: EModalAssetDetailRoutes.TokenDetails,
         params: {
-          accountId: account.id,
+          // accountId: account.id,
           networkId: network.id,
           walletId: wallet.id,
           deriveInfo,

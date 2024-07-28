@@ -1,4 +1,4 @@
-package so.onekey.app.wallet;
+package com.langitwallet.app;
 
 import androidx.annotation.NonNull;
 

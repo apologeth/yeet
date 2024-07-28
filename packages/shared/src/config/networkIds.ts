@@ -54,7 +54,8 @@ export type INetworkShortCode =
   | 'sepolia'
   | 'mantle'
   | 'mantapacific'
-  | 'fevm';
+  | 'fevm'
+  | 'langit';
 
 const checkErrors: string[] = [];
 // TODO generate getNetworkIdsMap in build time
@@ -74,6 +75,7 @@ export const getNetworkIdsMap = memoFn(() => {
     //     )}`,
     //   );
     // }
+    console.log('MEMO', memo);
     return memo;
   }, {} as Record<INetworkShortCode, string>);
   if (checkErrors.length) {

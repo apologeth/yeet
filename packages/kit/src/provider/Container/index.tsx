@@ -15,6 +15,8 @@ import { KeyboardContainer } from './KeyboardContainer';
 import { NavigationContainer } from './NavigationContainer';
 import { PortalBodyContainer } from './PortalBodyContainer';
 import { QrcodeDialogContainer } from './QrcodeDialogContainer';
+import { Platform } from 'react-native';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 function GlobalRootAppNavigationUpdate() {
   const navigation = useAppNavigation();
@@ -23,6 +25,15 @@ function GlobalRootAppNavigationUpdate() {
 }
 
 export function Container() {
+  if (Platform.OS === 'android') {
+    GoogleSignin.configure({
+      webClientId:
+        '97012934568-5471jl4oo30dl89npukqkpj6tqb2icth.apps.googleusercontent.com',
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+  }
+
   return (
     <RootSiblingParent>
       <AppStateLockContainer>

@@ -1195,6 +1195,7 @@ export enum ETranslations {
   settings_select_wallet = 'settings.select_wallet',
   settings_settings = 'settings.settings',
   settings_sign_text = 'settings.sign_text',
+  settings_sign_up_with_google = 'settings.sign_up_with_google',
   settings_signature_record = 'settings.signature_record',
   settings_spend_dust_utxo = 'settings.spend_dust_utxo',
   settings_spend_dust_utxo_desc = 'settings.spend_dust_utxo_desc',

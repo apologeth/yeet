@@ -83,9 +83,9 @@ android {
 
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'so.onekey.app.wallet'
+    namespace 'com.langitwallet.app'
     defaultConfig {
-        applicationId 'so.onekey.app.wallet.dev'
+        applicationId 'com.langitwallet.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -104,11 +104,11 @@ android {
     }
     buildTypes {
         debug {
-            resValue "string", "app_name", "OneKey Dev"
+            resValue "string", "app_name", "LangitWallet Dev"
             signingConfig signingConfigs.debug
         }
         release {
-            resValue "string", "app_name", "OneKey"
+            resValue "string", "app_name", "LangitWallet"
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug

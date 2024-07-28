@@ -76,14 +76,14 @@ const ChainSelectorEditableView: FC<IChainSelectorEditableViewProps> = ({
     <Page>
       <Page.Header
         title={intl.formatMessage({ id: ETranslations.global_networks })}
-        headerRight={() =>
-          getHeaderRightComponent(
-            isEditMode
-              ? intl.formatMessage({ id: ETranslations.global_done })
-              : intl.formatMessage({ id: ETranslations.global_edit }),
-            handleEditButtonPress,
-          )
-        }
+        // headerRight={() =>
+        //   getHeaderRightComponent(
+        //     isEditMode
+        //       ? intl.formatMessage({ id: ETranslations.global_done })
+        //       : intl.formatMessage({ id: ETranslations.global_edit }),
+        //     handleEditButtonPress,
+        //   )
+        // }
       />
       <Page.Body>
         <EditableView

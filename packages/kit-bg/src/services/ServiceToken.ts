@@ -55,16 +55,21 @@ class ServiceToken extends ServiceBase {
         networkId === getNetworkIdsMap().eth ? EthereumMatic : SepoliaMatic;
       rest.contractList = ['', maticAddress, ...contractList];
     }
+
     const vault = await vaultFactory.getChainOnlyVault({
       networkId: rest.networkId,
     });
+
     const { normalizedAddress } = await vault.validateAddress(
       rest.accountAddress,
     );
+
+
     rest.accountAddress = normalizedAddress;
     const client = await this.getClient(EServiceEndpointEnum.Wallet);
     const controller = new AbortController();
     this._fetchAccountTokensController = controller;
+
     const resp = await client.post<{ data: IFetchAccountTokensResp }>(
       `/wallet/v1/account/token/list?flag=${flag || ''}`,
       rest,

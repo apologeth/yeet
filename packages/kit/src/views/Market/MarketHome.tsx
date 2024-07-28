@@ -79,7 +79,7 @@ function MarketHome() {
   const tabConfig = useMemo(
     () =>
       categories?.map((category, index) => ({
-        title: category.name,
+        title: category?.name,
         // eslint-disable-next-line react/no-unstable-nested-components
         page: () =>
           index === 0 ? (

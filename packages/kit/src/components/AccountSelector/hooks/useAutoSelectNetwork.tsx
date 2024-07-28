@@ -33,7 +33,7 @@ export function useAutoSelectNetwork({ num }: { num: number }) {
     // TODO move below code to actions
     const network = networkIds.find((item) => item === networkId);
     if (!network || !networkId) {
-      let usedNetworkId = networkIds[0];
+      let usedNetworkId = networkIds[2];
       if (defaultNetworkId) {
         const founded = networkIds.find((item) => item === defaultNetworkId);
         if (founded) {
