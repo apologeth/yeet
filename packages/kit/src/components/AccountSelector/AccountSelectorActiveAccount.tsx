@@ -69,7 +69,7 @@ export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
         },
       });
     } else {
-      copyText(myAccount?.address);
+      copyText(myAccount?.accountAbstractionAddress);
     }
     logActiveAccount();
   }, [
@@ -84,7 +84,7 @@ export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
   ]);
 
   // show address if account has an address
-  if (myAccount?.address) {
+  if (myAccount?.accountAbstractionAddress) {
     return (
       <Tooltip
         renderContent={intl.formatMessage({
@@ -122,7 +122,7 @@ export function AccountSelectorActiveAccountHome({ num }: { num: number }) {
             userSelect="none"
           >
             <SizableText size="$bodyMd">
-              {accountUtils.shortenAddress({ address: myAccount?.address })}
+              {accountUtils.shortenAddress({ address: myAccount?.accountAbstractionAddress })}
             </SizableText>
           </XStack>
         }

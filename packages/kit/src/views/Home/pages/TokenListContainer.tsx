@@ -82,7 +82,7 @@ function TokenListContainer({
         if (!myAccount || !network) return;
 
         await backgroundApiProxy.serviceToken.abortFetchAccountTokens();
-        const accountAddress = myAccount?.address;
+        const accountAddress = myAccount?.accountAbstractionAddress;
         // const accountAddress =
         //   await backgroundApiProxy.serviceAccount.getAccountAddressForApi({
         //     accountId: account.id,

@@ -58,12 +58,12 @@ function WalletActionSend() {
     // if (vaultSettings?.isSingleToken) {
     //   const nativeToken = await backgroundApiProxy.serviceToken.getNativeToken({
     //     networkId: network.id,
-    //     accountId: myAccount?.address,
+    //     accountId: myAccount?.accountAbstractionAddress,
     //   });
     //   navigation.pushModal(EModalRoutes.SendModal, {
     //     screen: EModalSendRoutes.SendDataInput,
     //     params: {
-    //       accountId: myAccount?.address,
+    //       accountId: myAccount?.accountAbstractionAddress,
     //       networkId: network.id,
     //       isNFT: false,
     //       token: nativeToken,

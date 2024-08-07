@@ -195,7 +195,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
       }
     } catch (error) {
       // @ts-ignore
-      console.log(error?.response)
+      console.log(error?.response);
       Toast.message({ message: 'Wrong key' });
     } finally {
       setLoading(false);
@@ -296,7 +296,13 @@ export function GetStarted({
       userInfo = await GoogleSignin.signIn();
       // const token = await GoogleSignin.getTokens();
 
-      console.log(userInfo);
+      const responseToken = await axios.post(
+        'https://langitapi.blockchainworks.id/api/clients/login',
+        {
+          'email': 'soul@yopmail.com',
+          'password': 'testclient',
+        },
+      );
 
       const response = await axios.post(
         'https://langitapi.blockchainworks.id/api/accounts/google-auth',
@@ -305,7 +311,17 @@ export function GetStarted({
         },
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNmMDgyZTVkLTQ3M2ItNDU1Zi04YzNlLTBlMzNkMzNkNmFhZSIsImVtYWlsIjoidGVzdGNsaWVudEBleGFtcGxlLmNvbSIsInR5cGUiOiJjbGllbnQiLCJpYXQiOjE3MjA0NTEzMjMsImV4cCI6MTgwNjk1MTMyM30.xBacNixBYlXmuqAHDcipkoBRmrU35O7Xaa7alB1DyE8`,
+            Authorization: `Bearer ${responseToken?.data?.data?.accessToken}`,
+          },
+        },
+      );
+
+      const responseAccount = await axios.get(
+        'https://langitapi.blockchainworks.id/api/accounts/' +
+          response?.data?.data?.id,
+        {
+          headers: {
+            Authorization: `Bearer ${response?.data?.data?.accessToken}`,
           },
         },
       );
@@ -317,18 +333,14 @@ export function GetStarted({
           imageUrl: userInfo?.user?.photo || '',
           idToken: userInfo?.idToken || '',
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          accessToken:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNmMDgyZTVkLTQ3M2ItNDU1Zi04YzNlLTBlMzNkMzNkNmFhZSIsImVtYWlsIjoidGVzdGNsaWVudEBleGFtcGxlLmNvbSIsInR5cGUiOiJjbGllbnQiLCJpYXQiOjE3MjA0NTEzMjMsImV4cCI6MTgwNjk1MTMyM30.xBacNixBYlXmuqAHDcipkoBRmrU35O7Xaa7alB1DyE8',
+          accessToken: responseToken?.data?.data?.accessToken,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          refreshToken:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNmMDgyZTVkLTQ3M2ItNDU1Zi04YzNlLTBlMzNkMzNkNmFhZSIsImVtYWlsIjoidGVzdGNsaWVudEBleGFtcGxlLmNvbSIsInR5cGUiOiJjbGllbnQiLCJpYXQiOjE3MjA0NTEzMjMsImV4cCI6MTgwNjk1MTMyM30.xBacNixBYlXmuqAHDcipkoBRmrU35O7Xaa7alB1DyE8',
+          refreshToken: responseToken?.data?.data?.refreshToken,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          'address': response?.data?.data?.address,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          'shamirKey': response?.data?.data?.shamirKey,
+          ...responseAccount?.data?.data,
         });
-        // await GoogleSignin.signOut();
-        // await GoogleSignin.revokeAccess();
+        // // await GoogleSignin.signOut();
+        // // await GoogleSignin.revokeAccess();
         navigation.navigate(ERootRoutes.Main);
       } else {
         await GoogleSignin.signOut();

@@ -66,7 +66,7 @@ export function HeaderRight({
       navigation.pushModal(EModalRoutes.SendModal, {
         screen: EModalSendRoutes.SendDataInput,
         params: {
-          accountId: myAccount?.address,
+          accountId: myAccount?.accountAbstractionAddress,
           networkId: network?.id,
           isNFT: false,
           address: result?.data,

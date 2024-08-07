@@ -60,11 +60,11 @@ export function AccountSelectorTriggerBase({
       <Image src={myAccount?.imageUrl} width={40} height={40} />
       <View pl="$2" pr="$1" minWidth={0}>
         <SizableText size="$bodySm" color="$textSubdued" numberOfLines={1}>
-          {myAccount?.address?.slice(0, 8) +
+          {myAccount?.accountAbstractionAddress?.slice(0, 8) +
             '....' +
-            myAccount?.address?.slice(
-              myAccount?.address?.length - 6,
-              myAccount?.address?.length,
+            myAccount?.accountAbstractionAddress?.slice(
+              myAccount?.accountAbstractionAddress?.length - 6,
+              myAccount?.accountAbstractionAddress?.length,
             ) || intl.formatMessage({ id: ETranslations.global_no_wallet })}
         </SizableText>
         <SizableText size="$bodyMdMedium" numberOfLines={1}>
@@ -74,7 +74,7 @@ export function AccountSelectorTriggerBase({
       </View>
       <TouchableOpacity
         onPress={() => {
-          copyText(myAccount?.address, 'Address copied');
+          copyText(myAccount?.accountAbstractionAddress, 'Address copied');
         }}
       >
         <Icon

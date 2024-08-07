@@ -27,7 +27,7 @@ function TokenBalanceView(props: IProps) {
         formatterOptions={{ tokenSymbol: symbol }}
         {...rest}
       >
-        {allToken[$key]?.balanceParsed ?? '0'}
+        {token?.balanceParsed || allToken[$key]?.balanceParsed || '0'}
       </NumberSizeableText>
     ),
     [rest, symbol, token?.balanceParsed],
