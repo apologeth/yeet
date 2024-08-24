@@ -88,8 +88,6 @@ function TokenListContainer({
         //     accountId: account.id,
         //     networkId: network.id,
         //   });
-
-        console.log('NETWORKK', network);
         if (network?.chainId === '170845') {
           const keys = '170845';
           const provider = new ethers.providers.JsonRpcProvider(

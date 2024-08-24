@@ -54,17 +54,17 @@ function useSendConfirm(params: IParams) {
         ...rest
       } = params;
       try {
-        const unsignedTx =
-          await backgroundApiProxy.serviceSend.prepareSendConfirmUnsignedTx({
-            networkId,
-            accountId,
-            ...rest,
-          });
+        // const unsignedTx =
+        //   await backgroundApiProxy.serviceSend.prepareSendConfirmUnsignedTx({
+        //     networkId,
+        //     accountId,
+        //     ...rest,
+        //   });
         if (sameModal) {
           navigation.push(EModalSendRoutes.SendConfirm, {
             accountId,
             networkId,
-            unsignedTxs: [unsignedTx],
+            unsignedTxs: [],
             onSuccess,
             onFail,
             onCancel,
@@ -76,7 +76,7 @@ function useSendConfirm(params: IParams) {
             params: {
               accountId,
               networkId,
-              unsignedTxs: [unsignedTx],
+              unsignedTxs: [],
               onSuccess,
               onFail,
               onCancel,

@@ -152,21 +152,38 @@ function RecoveryInput({ userInfo, onClose }: any) {
       // userInfo = await GoogleSignin.signIn();
       // const token = await GoogleSignin.getTokens();
 
-      console.log(userInfo);
+      const responseToken = await axios.post(
+        'https://langitapi.blockchainworks.id/api/clients/login',
+        {
+          'email': 'soul@yopmail.com',
+          'password': 'testclient',
+        },
+      );
 
       const response = await axios.post(
         'https://langitapi.blockchainworks.id/api/accounts/recover',
         {
           email: userInfo?.user?.email,
-          shamir_key: values?.password,
+          shard_email: values?.password,
         },
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNmMDgyZTVkLTQ3M2ItNDU1Zi04YzNlLTBlMzNkMzNkNmFhZSIsImVtYWlsIjoidGVzdGNsaWVudEBleGFtcGxlLmNvbSIsInR5cGUiOiJjbGllbnQiLCJpYXQiOjE3MjA0NTEzMjMsImV4cCI6MTgwNjk1MTMyM30.xBacNixBYlXmuqAHDcipkoBRmrU35O7Xaa7alB1DyE8`,
+            Authorization: `Bearer ${responseToken?.data?.data?.accessToken}`,
           },
         },
       );
 
+      const responseAccount = await axios.get(
+        'https://langitapi.blockchainworks.id/api/accounts/' +
+          response?.data?.data?.id,
+        {
+          headers: {
+            Authorization: `Bearer ${response?.data?.data?.accessToken}`,
+          },
+        },
+      );
+
+      console.log('REEE', responseAccount?.data);
       if (response?.status === 200) {
         setMyAccount({
           accountName: userInfo?.user?.name || '',
@@ -174,18 +191,14 @@ function RecoveryInput({ userInfo, onClose }: any) {
           imageUrl: userInfo?.user?.photo || '',
           idToken: userInfo?.idToken || '',
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          accessToken:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNmMDgyZTVkLTQ3M2ItNDU1Zi04YzNlLTBlMzNkMzNkNmFhZSIsImVtYWlsIjoidGVzdGNsaWVudEBleGFtcGxlLmNvbSIsInR5cGUiOiJjbGllbnQiLCJpYXQiOjE3MjA0NTEzMjMsImV4cCI6MTgwNjk1MTMyM30.xBacNixBYlXmuqAHDcipkoBRmrU35O7Xaa7alB1DyE8',
+          accessToken: responseToken?.data?.data?.accessToken,
+          refreshToken: responseToken?.data?.data?.refreshToken,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          refreshToken:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNmMDgyZTVkLTQ3M2ItNDU1Zi04YzNlLTBlMzNkMzNkNmFhZSIsImVtYWlsIjoidGVzdGNsaWVudEBleGFtcGxlLmNvbSIsInR5cGUiOiJjbGllbnQiLCJpYXQiOjE3MjA0NTEzMjMsImV4cCI6MTgwNjk1MTMyM30.xBacNixBYlXmuqAHDcipkoBRmrU35O7Xaa7alB1DyE8',
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          'address': response?.data?.data?.address,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          'shamirKey': response?.data?.data?.shamirKey,
+          ...response?.data?.data,
+          ...responseAccount?.data?.data,
         });
-        // await GoogleSignin.signOut();
-        // await GoogleSignin.revokeAccess();
+        // // await GoogleSignin.signOut();
+        // // await GoogleSignin.revokeAccess();
         onClose();
         navigation.navigate(ERootRoutes.Main);
       } else {
@@ -333,9 +346,16 @@ export function GetStarted({
           imageUrl: userInfo?.user?.photo || '',
           idToken: userInfo?.idToken || '',
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          accessToken: responseToken?.data?.data?.accessToken,
+          accessToken: response?.data?.data?.accessToken,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          refreshToken: responseToken?.data?.data?.refreshToken,
+          refreshToken: response?.data?.data?.refreshToken,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          'address': response?.data?.data?.address,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          'accountAbstractionAddress':
+            response?.data?.data?.accountAbstractionAddress,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          'shardDevice': response?.data?.data?.shardDevice,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           ...responseAccount?.data?.data,
         });

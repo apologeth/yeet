@@ -17,6 +17,10 @@ import { PortalBodyContainer } from './PortalBodyContainer';
 import { QrcodeDialogContainer } from './QrcodeDialogContainer';
 import { Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useEffect } from 'react';
+import { myAccountAtom } from '../../states/jotai/myAccountAtom';
+import { useAtom } from 'jotai';
+import axios from 'axios';
 
 function GlobalRootAppNavigationUpdate() {
   const navigation = useAppNavigation();
@@ -33,6 +37,8 @@ export function Container() {
       forceCodeForRefreshToken: true,
     });
   }
+
+  const [myAccount, setMyAccount] = useAtom(myAccountAtom);
 
   return (
     <RootSiblingParent>

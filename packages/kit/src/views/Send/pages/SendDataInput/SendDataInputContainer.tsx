@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useRoute } from '@react-navigation/core';
 import BigNumber from 'bignumber.js';
@@ -7,12 +7,14 @@ import { isNaN, isNil } from 'lodash';
 import { useIntl } from 'react-intl';
 
 import {
+  Button,
   Form,
   Input,
   Page,
   SizableText,
   TextArea,
   XStack,
+  useClipboard,
   useForm,
   useMedia,
 } from '@onekeyhq/components';
@@ -58,6 +60,11 @@ import { showBalanceDetailsDialog } from '../../../Home/components/BalanceDetail
 import { HomeTokenListProviderMirror } from '../../../Home/components/HomeTokenListProvider/HomeTokenListProviderMirror';
 
 import type { RouteProp } from '@react-navigation/core';
+import { useAtom } from 'jotai';
+import { myAccountAtom } from '../../../../states/jotai/myAccountAtom';
+import { ethers } from 'ethers';
+import { Linking, Modal, Text, View } from 'react-native';
+import axios from 'axios';
 
 function SendDataInputContainer() {
   const intl = useIntl();
@@ -71,6 +78,9 @@ function SendDataInputContainer() {
 
   const [allTokens] = useAllTokenListAtom();
   const [map] = useAllTokenListMapAtom();
+  const [transactionHash, setTransactionHash] = useState('');
+  const [transactionId, setTransactionId] = useState('');
+  const { copyText } = useClipboard();
 
   const route =
     useRoute<RouteProp<IModalSendParamList, EModalSendRoutes.SendDataInput>>();
@@ -87,9 +97,14 @@ function SendDataInputContainer() {
     amount: sendAmount = '',
   } = route.params;
   const nft = nfts?.[0];
+  const [myAccount] = useAtom(myAccountAtom);
+
   const [tokenInfo, setTokenInfo] = useState(token);
   const { account, network } = useAccountData({ accountId, networkId });
-  const sendConfirm = useSendConfirm({ accountId, networkId });
+  const sendConfirm = useSendConfirm({
+    accountId: myAccount?.address,
+    networkId,
+  });
 
   const isSelectTokenDisabled = allTokens.tokens.length <= 1;
 
@@ -207,7 +222,7 @@ function SendDataInputContainer() {
     { watchLoading: true, alwaysSetState: true },
   );
 
-  if (tokenDetails && isNil(tokenDetails?.balanceParsed)) {
+  if (tokenDetails && isNil(activeToken?.balanceParsed)) {
     tokenDetails.balanceParsed = new BigNumber(tokenDetails.balance)
       .shiftedBy(tokenDetails.info.decimals * -1)
       .toFixed();
@@ -218,6 +233,7 @@ function SendDataInputContainer() {
   const form = useForm({
     defaultValues: {
       to: { raw: address } as IAddressInputValue,
+      shardKey: '',
       amount: sendAmount,
       nftAmount: sendAmount || '1',
       memo: '',
@@ -318,60 +334,74 @@ function SendDataInputContainer() {
     navigation,
     networkId,
   ]);
+
+  useEffect(() => {
+    if (transactionId) {
+      let trxInterval;
+      const getTrxProcess = async () => {
+        const responseTrx = await axios.get(
+          'https://langitapi.blockchainworks.id/api/transactions/' + transactionId
+        );
+        
+        if (responseTrx?.data?.data?.transaction_hash) {
+          setTransactionHash(responseTrx.data.data.transaction_hash);
+          clearInterval(trxInterval); // Clear the interval if transaction_hash is found
+        }
+      };
+
+      trxInterval = setInterval(() => {
+        getTrxProcess();
+      }, 1000);
+
+      // Clear the interval on component unmount to prevent memory leaks
+      return () => clearInterval(trxInterval);
+    }
+  }, [transactionId]);
+
   const handleOnConfirm = useCallback(async () => {
     try {
-      if (!account) return;
+      if (!myAccount?.accountAbstractionAddress) return;
       const toAddress = form.getValues('to').resolved;
       if (!toAddress) return;
-      let realAmount = amount;
-
+      const realAmount = amount;
       setIsSubmitting(true);
 
-      if (isNFT) {
-        realAmount = nftAmount;
-      } else {
-        realAmount = amount;
+      try {
+        const responseTokens = await axios.get(
+          'https://langitapi.blockchainworks.id/api/tokens/',
+        );
 
-        if (isUseFiat) {
-          if (
-            new BigNumber(amount).isGreaterThan(tokenDetails?.fiatValue ?? 0)
-          ) {
-            realAmount = tokenDetails?.balanceParsed ?? '0';
-          } else {
-            realAmount = linkedAmount.originalAmount;
-          }
-        }
+        const response = await axios.post(
+          'https://langitapi.blockchainworks.id/api/transactions',
+          {
+            'sender_address': myAccount?.accountAbstractionAddress,
+            'receiver_address': toAddress,
+            'sent_amount': realAmount,
+            'sent_token_address':
+              responseTokens?.data?.data[0]?.address ||
+              responseTokens?.data?.data['0']?.address,
+            'received_token_address':
+              responseTokens?.data?.data[0]?.address ||
+              responseTokens?.data?.data['0']?.address,
+            'shard_device': form.getValues('shardKey'),
+          },
+        );
+        setTransactionId(response?.data?.data?.transaction_id);
+
+        console.log('SUCCESS SEND', response?.data);
+      } catch (error) {
+        console.error('ERROIR SEND', error);
       }
 
-      const memoValue = form.getValues('memo');
-      const paymentIdValue = form.getValues('paymentId');
-      const transfersInfo: ITransferInfo[] = [
-        {
-          from: account.address,
-          to: toAddress,
-          amount: realAmount,
-          nftInfo:
-            isNFT && nftDetails
-              ? {
-                  nftId: nftDetails.itemId,
-                  nftAddress: nftDetails.collectionAddress,
-                  nftType: nftDetails.collectionType,
-                }
-              : undefined,
-          tokenInfo: !isNFT && tokenDetails ? tokenDetails.info : undefined,
-          memo: memoValue,
-          paymentId: paymentIdValue,
-        },
-      ];
-      await sendConfirm.navigationToSendConfirm({
-        transfersInfo,
-        sameModal: true,
-        transferPayload: {
-          amountToSend: realAmount,
-          isMaxSend,
-        },
-      });
-      setIsSubmitting(false);
+      // await sendConfirm.navigationToSendConfirm({
+      //   transfersInfo,
+      //   sameModal: true,
+      //   transferPayload: {
+      //     amountToSend: realAmount,
+      //     isMaxSend,
+      //   },
+      // });
+      // setIsSubmitting(false);
     } catch (e: any) {
       setIsSubmitting(false);
 
@@ -410,26 +440,26 @@ function SendDataInputContainer() {
       let isInsufficientBalance = false;
       let isLessThanMinTransferAmount = false;
       if (isUseFiat) {
-        if (amountBN.isGreaterThan(tokenDetails?.fiatValue ?? 0)) {
+        if (amountBN.isGreaterThan(activeToken?.balanceParsed)) {
           isInsufficientBalance = true;
         }
 
-        if (
-          tokenDetails?.price &&
-          amountBN
-            .dividedBy(tokenDetails.price)
-            .isLessThan(vaultSettings?.minTransferAmount ?? 0)
-        ) {
-          isLessThanMinTransferAmount = true;
-        }
+        // if (
+        //   tokenDetails?.price &&
+        //   amountBN
+        //     .dividedBy(tokenDetails.price)
+        //     .isLessThan(vaultSettings?.minTransferAmount ?? 0)
+        // ) {
+        //   isLessThanMinTransferAmount = true;
+        // }
       } else {
-        if (amountBN.isGreaterThan(tokenDetails?.balanceParsed ?? 0)) {
+        if (amountBN.isGreaterThan(activeToken?.balanceParsed ?? 0)) {
           isInsufficientBalance = true;
         }
 
-        if (amountBN.isLessThan(vaultSettings?.minTransferAmount ?? 0)) {
-          isLessThanMinTransferAmount = true;
-        }
+        // if (amountBN.isLessThan(vaultSettings?.minTransferAmount ?? 0)) {
+        //   isLessThanMinTransferAmount = true;
+        // }
       }
 
       if (isInsufficientBalance)
@@ -456,20 +486,6 @@ function SendDataInputContainer() {
           },
         );
 
-      try {
-        const toRaw = form.getValues('to').raw;
-        await backgroundApiProxy.serviceValidator.validateSendAmount({
-          accountId,
-          networkId,
-          amount: amountBN.toString(),
-          tokenBalance: tokenDetails?.balanceParsed ?? '0',
-          to: toRaw ?? '',
-        });
-      } catch (e) {
-        console.log('error: ', e);
-        return (e as Error).message;
-      }
-
       if (
         !isNFT &&
         tokenDetails?.info.isNative &&
@@ -488,7 +504,7 @@ function SendDataInputContainer() {
       tokenDetails?.info.isNative,
       tokenDetails?.fiatValue,
       tokenDetails?.price,
-      tokenDetails?.balanceParsed,
+      activeToken?.balanceParsed,
       vaultSettings?.transferZeroNativeTokenEnabled,
       vaultSettings?.minTransferAmount,
       isUseFiat,
@@ -532,7 +548,12 @@ function SendDataInputContainer() {
       return tokenDetails?.fiatValue ?? '0';
     }
     return activeToken?.balanceParsed ?? '0';
-  }, [isUseFiat, tokenDetails?.balanceParsed, tokenDetails?.fiatValue, activeToken]);
+  }, [
+    isUseFiat,
+    activeToken?.balanceParsed,
+    tokenDetails?.fiatValue,
+    activeToken,
+  ]);
 
   const renderTokenDataInputForm = useCallback(
     () => (
@@ -554,13 +575,13 @@ function SendDataInputContainer() {
               );
               return;
             }
-            const dp = valueBN.decimalPlaces();
-            if (!isUseFiat && dp && dp > (tokenDetails?.info.decimals ?? 0)) {
-              form.setValue(
-                'amount',
-                valueBN.toFixed(tokenDetails?.info.decimals ?? 0),
-              );
-            }
+            // const dp = valueBN.decimalPlaces();
+            // if (!isUseFiat && dp && dp > (tokenDetails?.info.decimals ?? 0)) {
+            //   form.setValue(
+            //     'amount',
+            //     valueBN.toFixed(tokenDetails?.info.decimals ?? 0),
+            //   );
+            // }
           },
         }}
       >
@@ -880,6 +901,15 @@ function SendDataInputContainer() {
               />
             </Form.Field>
             {renderDataInput()}
+            <Form.Field
+              label={'Your shard key'}
+              name="shardKey"
+              rules={{
+                required: true,
+              }}
+            >
+              <Input />
+            </Form.Field>
           </Form>
         </AccountSelectorProviderMirror>
       </Page.Body>
@@ -893,6 +923,56 @@ function SendDataInputContainer() {
           loading: isSubmitting,
         }}
       />
+      <Modal transparent visible={!!transactionHash}>
+        <View
+          style={{
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: '#0f0f0f',
+              borderRadius: 20,
+              width: '90%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                marginBottom: 24,
+                textAlign: 'center',
+                color: 'white',
+              }}
+            >
+              Your transaction hash is:{'\n'}
+              {transactionHash}
+            </Text>
+            <Button
+              style={{ color: 'white' }}
+              onPress={() => {
+                Linking.openURL(
+                  'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz/tx/' +
+                    transactionHash,
+                );
+                copyText(
+                  'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz/tx/' +
+                    transactionHash,
+                );
+                navigation.popStack();
+                setTransactionHash('');
+              }}
+            >
+              Copy URL & Open transaction detail in browser
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </Page>
   );
 }

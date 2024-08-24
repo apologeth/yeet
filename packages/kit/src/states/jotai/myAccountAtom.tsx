@@ -9,5 +9,5 @@ export const myAccountAtom = atomWithAsyncStorage('myAccounts', {
   accessToken: '',
   refreshToken: '',
   address: '',
-  shamirKey: '',
+  shardDevice: '',
 });
