@@ -156,7 +156,7 @@ export function HomePageView({
       );
     }
 
-    if (!myAccount?.accountAbstractionAddress) {
+    if (!myAccount?.account_abstraction_address) {
       return (
         <YStack height="100%">
           <HomeSelector padding="$5" />
@@ -212,7 +212,7 @@ export function HomePageView({
         <EmptyWallet />
       </Stack>
     );
-    if (myAccount?.accountAbstractionAddress) {
+    if (myAccount?.account_abstraction_address) {
       content = renderHomePageContent();
       // This is a temporary hack solution, need to fix the layout of headerLeft and headerRight
     }

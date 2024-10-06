@@ -34,7 +34,11 @@ export function Container() {
       webClientId:
         '97012934568-5471jl4oo30dl89npukqkpj6tqb2icth.apps.googleusercontent.com',
       offlineAccess: true,
-      forceCodeForRefreshToken: true,
+      // forceCodeForRefreshToken: true,
+      scopes: [
+        // 'https://www.googleapis.com/auth/userinfo.email',
+        // 'https://www.googleapis.com/auth/userinfo.profile',
+      ],
     });
   }
 

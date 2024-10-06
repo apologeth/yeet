@@ -146,14 +146,14 @@ export function ImportSingleChainBase({
       <Page.Header title={title} />
       <Page.Body px="$5">
         <Form form={form}>
-          <Form.Field
+          {/* <Form.Field
             label={intl.formatMessage({ id: ETranslations.global_network })}
             name="networkId"
           >
             <ControlledNetworkSelectorTrigger
               excludedNetworkIds={excludedNetworkIds}
             />
-          </Form.Field>
+          </Form.Field> */}
           <Form.Field label={inputLabel} name="input">
             <Input
               secureTextEntry={inputIsSecure}

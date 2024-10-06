@@ -23,10 +23,10 @@ export function AccountSelectorTriggerBase({
 }: {
   num: number;
 } & IAccountSelectorRouteParamsExtraConfig) {
-  // const {
-  //   activeAccount: { account, dbAccount, indexedAccount, accountName, wallet },
-  //   showAccountSelector,
-  // } = useAccountSelectorTrigger({ num, ...others });
+  const {
+    activeAccount: { account, dbAccount, indexedAccount, accountName, wallet },
+    showAccountSelector,
+  } = useAccountSelectorTrigger({ num, ...others });
   const [myAccount] = useAtom(myAccountAtom);
   const intl = useIntl();
   const { copyText } = useClipboard();
@@ -60,11 +60,11 @@ export function AccountSelectorTriggerBase({
       <Image src={myAccount?.imageUrl} width={40} height={40} />
       <View pl="$2" pr="$1" minWidth={0}>
         <SizableText size="$bodySm" color="$textSubdued" numberOfLines={1}>
-          {myAccount?.accountAbstractionAddress?.slice(0, 8) +
+          {myAccount?.account_abstraction_address?.slice(0, 8) +
             '....' +
-            myAccount?.accountAbstractionAddress?.slice(
-              myAccount?.accountAbstractionAddress?.length - 6,
-              myAccount?.accountAbstractionAddress?.length,
+            myAccount?.account_abstraction_address?.slice(
+              myAccount?.account_abstraction_address?.length - 6,
+              myAccount?.account_abstraction_address?.length,
             ) || intl.formatMessage({ id: ETranslations.global_no_wallet })}
         </SizableText>
         <SizableText size="$bodyMdMedium" numberOfLines={1}>
@@ -74,7 +74,7 @@ export function AccountSelectorTriggerBase({
       </View>
       <TouchableOpacity
         onPress={() => {
-          copyText(myAccount?.accountAbstractionAddress, 'Address copied');
+          copyText(myAccount?.account_abstraction_address, 'Address copied');
         }}
       >
         <Icon

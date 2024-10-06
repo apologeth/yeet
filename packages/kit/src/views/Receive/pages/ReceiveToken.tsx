@@ -188,7 +188,7 @@ function ReceiveToken() {
           p="$4"
         >
           <QRCode
-            value={myAccount?.accountAbstractionAddress}
+            value={myAccount?.account_abstraction_address}
             logo={{
               uri: network.logoURI,
             }}
@@ -243,7 +243,7 @@ function ReceiveToken() {
               wordBreak: 'break-all',
             }}
           >
-            {myAccount?.accountAbstractionAddress}
+            {myAccount?.account_abstraction_address}
           </SizableText>
 
           {!isShowAddress ? (
@@ -288,7 +288,7 @@ function ReceiveToken() {
           <Button
             mt="$5"
             icon="Copy1Outline"
-            onPress={() => copyText(myAccount?.accountAbstractionAddress)}
+            onPress={() => copyText(myAccount?.account_abstraction_address)}
           >
             {intl.formatMessage({
               id: ETranslations.global_copy_address,

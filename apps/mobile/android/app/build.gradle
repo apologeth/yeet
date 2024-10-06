@@ -83,9 +83,9 @@ android {
 
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.langitwallet.app'
+    namespace 'com.xo.app'
     defaultConfig {
-        applicationId 'com.langitwallet.app'
+        applicationId 'com.xo.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -104,11 +104,11 @@ android {
     }
     buildTypes {
         debug {
-            resValue "string", "app_name", "LangitWallet Dev"
+            resValue "string", "app_name", "x0 Dev"
             signingConfig signingConfigs.debug
         }
         release {
-            resValue "string", "app_name", "LangitWallet"
+            resValue "string", "app_name", "x0"
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
@@ -122,12 +122,12 @@ android {
     }
     flavorDimensions "dimension"
     productFlavors {
-    	huawei {
-    		dimension "dimension"
-    	}
-    	google {
-    		dimension "dimension"
-    	}
+    	// huawei {
+    	// 	dimension "dimension"
+    	// }
+    	// google {
+    	// 	dimension "dimension"
+    	// }
     	prod {
     		dimension "dimension"
     	}

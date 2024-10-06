@@ -58,6 +58,7 @@ function ActionItem({
         color="$textSubdued"
       >
         {label}
+        {/* Topup */}
       </SizableText>
     </Stack>
   );
@@ -67,11 +68,16 @@ function ActionBuy(props: IActionItemsProps) {
   const intl = useIntl();
   return (
     <ActionItem
-      label={intl.formatMessage({ id: ETranslations.global_buy })}
+      label={"Topup"}
       icon="PlusLargeOutline"
       {...props}
     />
   );
+}
+
+function ActionPay(props: IActionItemsProps) {
+  const intl = useIntl();
+  return <ActionItem label={'Pay to Fiat'} icon="Rupiah" {...props} />;
 }
 
 function ActionSell(props: IActionItemsProps) {
@@ -165,5 +171,6 @@ RawActions.Sell = ActionSell;
 RawActions.Send = ActionSend;
 RawActions.Receive = ActionReceive;
 RawActions.Swap = ActionSwap;
+RawActions.Pay = ActionPay;
 
 export { RawActions, ActionItem };

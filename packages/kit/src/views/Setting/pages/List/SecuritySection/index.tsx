@@ -201,8 +201,8 @@ export const SecuritySection = () => {
       </Suspense>
       <AppAutoLockItem />
       <PasswordItem />
-      {!platformEnv.isWebDappMode ? <ConnectedSitesItem /> : null}
-      <SignatureRecordItem />
+      {/* {!platformEnv.isWebDappMode ? <ConnectedSitesItem /> : null} */}
+      {/* <SignatureRecordItem /> */}
       <ProtectionItem />
       <CleanDataItem />
     </Section>

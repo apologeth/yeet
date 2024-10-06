@@ -152,7 +152,7 @@ export const DefaultSection = () => {
       <LockNowButton />
       {platformEnv.isExtension ? <DefaultWalletSetting /> : null}
       <AddressBookItem />
-      {platformEnv.isNative ? (
+      {/* {platformEnv.isNative ? (
         <ListItem
           icon="RepeatOutline"
           title={intl.formatMessage({
@@ -168,14 +168,14 @@ export const DefaultSection = () => {
             });
           }}
         />
-      ) : null}
+      ) : null} */}
       {/* <ListItem
         icon="RepeatOutline"
         title="Migration"
         drillIn
         onPress={() => {}}
       /> */}
-      {platformEnv.isNative ? (
+      {/* {platformEnv.isNative ? (
         <ListItem
           icon="OnekeyLiteOutline"
           title={intl.formatMessage({ id: ETranslations.global_onekey_lite })}
@@ -196,7 +196,7 @@ export const DefaultSection = () => {
             screen: EModalKeyTagRoutes.UserOptions,
           });
         }}
-      />
+      /> */}
     </YStack>
   );
 };

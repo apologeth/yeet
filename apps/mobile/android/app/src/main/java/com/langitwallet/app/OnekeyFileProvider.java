@@ -1,4 +1,4 @@
-package com.langitwallet.app;
+package com.xo.app;
 
 import android.content.Context;
 import android.net.Uri;

@@ -34,44 +34,31 @@ export const dangerAllNetworkRepresent: IServerNetwork = {
 };
 
 export const getPresetNetworks = memoFn((): IServerNetwork[] => {
-  let a = {
-    '$key':
-      'evm--170845_0x42e19b59fa5632c01b87666a400a002a695251d2_0x0000000000000000000000000000000000000000',
-    'address': '0x0000000000000000000000000000000000000000',
-    'decimals': 6,
-    'isNative': false,
-    'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
-    'name': 'ETH',
-    'riskLevel': 1,
-    'symbol': 'ETH',
-    'totalSupply': '',
-  };
-  const langit = {
+  const x0 = {
     'chainId': '170845',
-    'code': 'langit',
+    'code': 'x0',
     'id': 'evm--170845',
     'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
-    'name': 'Langit Testnet',
-    'shortcode': 'langit',
-    'shortname': 'Langit',
+    'name': 'x0',
+    'shortcode': 'x0',
+    'shortname': 'x0',
     'feeMeta': {
-      'code': 'Langit',
+      'code': 'x0',
       'decimals': 9,
       'symbol': 'ETH',
     },
     'rpcURLs': [
       {
-        'url': 'https://rpc-langit-testnet-9osqsm6ktp.t.conduit.xyz',
+        'url': 'https://rpc-x0sepolia-id058i99l1.t.conduit.xyz',
       },
     ],
-    'rpcUrl': 'https://rpc-langit-testnet-9osqsm6ktp.t.conduit.xyz',
+    'rpcUrl': 'https://rpc-x0sepolia-id058i99l1.t.conduit.xyz',
     'explorers': [
       {
-        'address': 'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz',
-        'block': 'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz',
-        'name': 'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz',
-        'transaction':
-          'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz',
+        'address': 'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz',
+        'block': 'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz',
+        'name': 'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz',
+        'transaction': 'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz',
       },
     ],
     'priceConfigs': [
@@ -192,7 +179,7 @@ export const getPresetNetworks = memoFn((): IServerNetwork[] => {
 
     arb,
     sepolia,
-    langit,
+    x0,
     // ...(platformEnv.isDev ? chainsOnlyEnabledInDev : []),
   ];
 });

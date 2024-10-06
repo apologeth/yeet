@@ -193,7 +193,9 @@ export const CleanDataItem = () => {
         {
           label: intl.formatMessage({ id: ETranslations.settings_reset_app }),
           destructive: true,
-          onPress: resetApp,
+          onPress: async () => {
+            resetApp();
+          },
           testID: 'setting-erase-data',
         },
       ]}

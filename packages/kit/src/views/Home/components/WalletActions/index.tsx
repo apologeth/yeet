@@ -58,12 +58,12 @@ function WalletActionSend() {
     // if (vaultSettings?.isSingleToken) {
     //   const nativeToken = await backgroundApiProxy.serviceToken.getNativeToken({
     //     networkId: network.id,
-    //     accountId: myAccount?.accountAbstractionAddress,
+    //     accountId: myAccount?.account_abstraction_address,
     //   });
     //   navigation.pushModal(EModalRoutes.SendModal, {
     //     screen: EModalSendRoutes.SendDataInput,
     //     params: {
-    //       accountId: myAccount?.accountAbstractionAddress,
+    //       accountId: myAccount?.account_abstraction_address,
     //       networkId: network.id,
     //       isNFT: false,
     //       token: nativeToken,
@@ -71,30 +71,22 @@ function WalletActionSend() {
     //   });
     //   return;
     // }
-
-    navigation.pushModal(EModalRoutes.AssetSelectorModal, {
-      screen: EAssetSelectorRoutes.TokenSelector,
+    console.log(
+      'ALL',
+      allTokens.tokens?.filter(
+        (val) => val?.address === '0xC3c5D2D5fB6b6FE9948aB94Ce94c018C2B663939',
+      )[0],
+    );
+    navigation.pushModal(EModalRoutes.SendModal, {
+      screen: EModalSendRoutes.SendDataInput,
       params: {
-        networkId: network.id,
         accountId: account?.id,
-        networkName: network.name,
-        tokens: {
-          data: allTokens.tokens,
-          keys: allTokens.keys,
-          map,
-        },
-        onSelect: async (token: IToken) => {
-          await timerUtils.wait(600);
-          navigation.pushModal(EModalRoutes.SendModal, {
-            screen: EModalSendRoutes.SendDataInput,
-            params: {
-              accountId: account?.id,
-              networkId: network.id,
-              isNFT: false,
-              token,
-            },
-          });
-        },
+        networkId: network.id,
+        isNFT: false,
+        token: allTokens.tokens?.filter(
+          (val) =>
+            val?.address === '0xC3c5D2D5fB6b6FE9948aB94Ce94c018C2B663939',
+        )[0],
       },
     });
   }, [
@@ -110,6 +102,64 @@ function WalletActionSend() {
 
   return (
     <RawActions.Send
+      onPress={handleOnSend}
+      // disabled={
+      //   vaultSettings?.disabledSendAction || !tokenListState.initialized
+      // }
+    />
+  );
+}
+
+function WalletActionPay() {
+  const navigation =
+    useAppNavigation<IPageNavigationProp<IModalSendParamList>>();
+  const {
+    activeAccount: { account, network },
+  } = useActiveAccount({ num: 0 });
+
+  const [allTokens] = useAllTokenListAtom();
+  const [map] = useAllTokenListMapAtom();
+  const [tokenListState] = useTokenListStateAtom();
+
+  const [myAccount] = useAtom(myAccountAtom);
+
+  const vaultSettings = usePromiseResult(async () => {
+    const settings = await backgroundApiProxy.serviceNetwork.getVaultSettings({
+      networkId: network?.id ?? '',
+    });
+    return settings;
+  }, [network?.id]).result;
+
+  const handleOnSend = useCallback(async () => {
+    console.log(myAccount, '\n', network, '\n', allTokens);
+    if (!myAccount || !network) return;
+
+    navigation.pushModal(EModalRoutes.SendModal, {
+      screen: EModalSendRoutes.SendDataInput,
+      params: {
+        accountId: account?.id,
+        networkId: network.id,
+        isNFT: false,
+        token: allTokens.tokens?.filter(
+          (val) =>
+            val?.address === '0xC3c5D2D5fB6b6FE9948aB94Ce94c018C2B663939',
+        )[0],
+        type: 'fiat',
+      },
+    });
+  }, [
+    myAccount,
+    account,
+    allTokens.keys,
+    allTokens.tokens,
+    vaultSettings,
+    map,
+    navigation,
+    network,
+  ]);
+
+  return (
+    <RawActions.Pay
       onPress={handleOnSend}
       // disabled={
       //   vaultSettings?.disabledSendAction || !tokenListState.initialized
@@ -148,10 +198,11 @@ function WalletActions({ ...rest }: IXStackProps) {
 
   return (
     <RawActions {...rest}>
-      {/* <ReviewControl>
+      <ReviewControl>
         <WalletActionBuy networkId={network?.id} accountId={account?.id} />
-      </ReviewControl> */}
+      </ReviewControl>
       <WalletActionSwap networkId={network?.id} />
+      <WalletActionPay />
       <WalletActionSend />
       <WalletActionReceive
         accountId={account?.id}

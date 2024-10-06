@@ -1,4 +1,4 @@
-package com.langitwallet.app;
+package com.xo.app;
 
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;

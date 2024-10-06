@@ -6,6 +6,7 @@ import {
   ListView,
   Page,
   Stack,
+  View,
   XStack,
   useSafeAreaInsets,
 } from '@onekeyhq/components';
@@ -125,7 +126,8 @@ export function AccountSelectorWalletListSideBar({ num }: IWalletListProps) {
         </XStack>
       ) : null}
       {/* Primary wallets */}
-      <ListView
+      <View style={{flex: 1}}/>
+      {/* <ListView
         showsVerticalScrollIndicator={false}
         p="$2"
         estimatedItemSize="$10"
@@ -149,9 +151,9 @@ export function AccountSelectorWalletListSideBar({ num }: IWalletListProps) {
           );
         }}
         ItemSeparatorComponent={ListItemSeparator}
-      />
+      /> */}
       {/* Others */}
-      {isEditableRouteParams ? (
+      {!isEditableRouteParams ? (
         <Stack
           p="$2"
           borderTopWidth={StyleSheet.hairlineWidth}

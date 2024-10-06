@@ -5729,7 +5729,6 @@ __metadata:
     "@polkadot/extension-inject": "npm:0.46.6"
     "@polkadot/types": "npm:11.3.1"
     "@polkadot/util-crypto": "npm:12.6.1"
-    "@react-native-google-signin/google-signin": "npm:^12.2.1"
     "@substrate/txwrapper-polkadot": "npm:7.5.1"
     "@tamagui/animations-moti": "npm:1.79.19"
     "@tamagui/babel-plugin": "npm:1.79.19"
@@ -6047,7 +6046,7 @@ __metadata:
     "@react-native-async-storage/async-storage": "npm:1.22.0"
     "@react-native-community/netinfo": "npm:^9.4.1"
     "@react-native-community/slider": "npm:4.4.3"
-    "@react-native-google-signin/google-signin": "npm:^9.1.0"
+    "@react-native-google-signin/google-signin": "npm:^13.0.1"
     "@shopify/flash-list": "npm:^1.6.3"
     "@types/react-native-canvas": "npm:^0.1.13"
     "@walletconnect/modal-react-native": "npm:1.1.0"
@@ -6096,7 +6095,7 @@ __metadata:
     react-native-keyboard-manager: "npm:^6.5.11-1"
     react-native-level-fs: "npm:^3.0.1"
     react-native-metrix: "npm:^0.6.3"
-    react-native-mmkv: "npm:2.10.2"
+    react-native-mmkv: "npm:2.12.2"
     react-native-modal: "npm:^13.0.1"
     react-native-permissions: "npm:^4.1.5"
     react-native-randombytes: "npm:^3.6.1"
@@ -8003,9 +8002,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-google-signin/google-signin@npm:^12.2.1":
-  version: 12.2.1
-  resolution: "@react-native-google-signin/google-signin@npm:12.2.1"
+"@react-native-google-signin/google-signin@npm:^13.0.1":
+  version: 13.0.1
+  resolution: "@react-native-google-signin/google-signin@npm:13.0.1"
   peerDependencies:
     expo: ">=50.0.0"
     react: "*"
@@ -8016,21 +8015,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 10/00a9e93ab613951a3b39cb2bc57e24c0772a7829c3d104a8f22eb931a71646c02294dd770d1cfd153775fd125c4f14f21a7f9bc85a257d2cd13c60ec6bd1e68b
-  languageName: node
-  linkType: hard
-
-"@react-native-google-signin/google-signin@npm:^9.1.0":
-  version: 9.1.0
-  resolution: "@react-native-google-signin/google-signin@npm:9.1.0"
-  peerDependencies:
-    expo: ">=47.0.0"
-    react: "*"
-    react-native: "*"
-  peerDependenciesMeta:
-    expo:
-      optional: true
-  checksum: 10/342bbbedbd2be3098cbc652779254bac395f13a261745dfc2092fd09d4dae1c47242023da1e80fdffb119778110abb2b6b22245291d7c522a15c4aee151c7ff5
+  checksum: 10/50a4ae92a9eda48ba2fe50f64225ca70fea7cfc9c8848a93ba782cb49345c953a6bffff1195d2d9401891c7b9cf0cde0a9f93134af1f56c9d23f2d1b3ff0f74b
   languageName: node
   linkType: hard
 
@@ -29140,13 +29125,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-mmkv@npm:2.10.2":
-  version: 2.10.2
-  resolution: "react-native-mmkv@npm:2.10.2"
+"react-native-mmkv@npm:2.12.2":
+  version: 2.12.2
+  resolution: "react-native-mmkv@npm:2.12.2"
   peerDependencies:
     react: "*"
     react-native: ">=0.71.0"
-  checksum: 10/0b592b06c02eccfb7edad16efa6ef683ac72bf9db2abbb48540b792176fe9e7a6a64c96741aa1cff596933ce479180f54e273031bb281bb310ae45b11b70df75
+  checksum: 10/c1ebb8e81905ee8ce17858ff6096525cbdd0e51892dca80a3cd6e26feb5e979a9c7d609c5a55886150efb0136c5899de174c71115f81607019ed7af68678797b
   languageName: node
   linkType: hard
 

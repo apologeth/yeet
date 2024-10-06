@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect } from 'react';
 
-import { CanceledError } from 'axios';
+import axios, { CanceledError } from 'axios';
 
 import type { ITabPageProps } from '@onekeyhq/components';
 import {
@@ -33,6 +33,7 @@ import { WalletActions } from '../components/WalletActions';
 import { useAtom } from 'jotai';
 import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
 import { ethers } from 'ethers';
+import SimpleToken from '../../../../assets/SimpleToken.json';
 
 function TokenListContainer({
   showWalletActions = false,
@@ -76,13 +77,33 @@ function TokenListContainer({
     updateSearchKey,
   } = useTokenListActions().current;
 
+  const getSTKBalance = async (tokenAddress: string) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'https://rpc-x0sepolia-id058i99l1.t.conduit.xyz/',
+    );
+
+    const sentTokenContract = new ethers.Contract(
+      tokenAddress,
+      SimpleToken.abi,
+      provider,
+    );
+
+    const balance = await sentTokenContract?.balanceOf(
+      myAccount?.account_abstraction_address,
+    );
+
+    const stringBalance = ethers.utils.formatUnits(balance, 6);
+
+    return stringBalance;
+  };
+
   const { run } = usePromiseResult(
     async () => {
       try {
         if (!myAccount || !network) return;
 
         await backgroundApiProxy.serviceToken.abortFetchAccountTokens();
-        const accountAddress = myAccount?.accountAbstractionAddress;
+        const accountAddress = myAccount?.account_abstraction_address;
         // const accountAddress =
         //   await backgroundApiProxy.serviceAccount.getAccountAddressForApi({
         //     accountId: account.id,
@@ -91,11 +112,25 @@ function TokenListContainer({
         if (network?.chainId === '170845') {
           const keys = '170845';
           const provider = new ethers.providers.JsonRpcProvider(
-            'https://rpc-langit-testnet-9osqsm6ktp.t.conduit.xyz/',
+            'https://rpc-x0sepolia-id058i99l1.t.conduit.xyz/',
           );
-
           const balance = await provider.getBalance(accountAddress);
           const stringBalance = ethers.utils.formatEther(balance);
+
+          const responseTokens = await axios.get(
+            'https://langitapi.blockchainworks.id/api/tokens/',
+          );
+          const langitTokens: any[] = await Promise.all(
+            responseTokens?.data?.data?.map(async (val) => {
+              const balance = await getSTKBalance(val?.address);
+              return {
+                ...val,
+                '$key': `evm-170845_0x42e19b59fa5632c01b87666a400a002a695251d2_${val?.address}`,
+                'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
+                balance: balance,
+              };
+            }),
+          );
 
           const tokens = [
             {
@@ -105,28 +140,47 @@ function TokenListContainer({
               'decimals': 6,
               'isNative': false,
               'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
-              'name': 'ETH',
+              'name': 'x0',
               'riskLevel': 1,
-              'symbol': 'ETH',
+              'symbol': 'x0',
               'totalSupply': '',
             },
+            ...langitTokens,
           ];
+
+          const response = await axios.get(
+            'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+              1,
+          );
+          const tokenMap = tokens?.reduce((acc, token) => {
+            // Create an entry in the accumulator object for each token
+
+            acc[token['$key']] = {
+              price: '0.0', // Default price, update with real value if available
+              price24h: '0', // Default 24h price change, update if available
+              balance: '0', // Default balance, update with real value if available
+              balanceParsed: token['$key']?.includes(
+                '0x0000000000000000000000000000000000000000',
+              )
+                ? stringBalance
+                : token?.balance, // Default parsed balance, replace with the correct variable
+              fiatValue: token['$key']?.includes(
+                '0x0000000000000000000000000000000000000000',
+              )
+                ? Number(stringBalance) * Number(response?.data?.data?.price)
+                : Number(token?.balance) * Number(response?.data?.data?.price), // Default fiat value, update with real value if available
+              address: token?.address,
+            };
+
+            return acc; // Return the updated accumulator object
+          }, {});
 
           refreshTokenList({ keys, tokens });
           refreshAllTokenList({
             keys,
             tokens,
           });
-          refreshAllTokenListMap({
-            'evm--170845_0x42e19b59fa5632c01b87666a400a002a695251d2_0x0000000000000000000000000000000000000000':
-              {
-                'price': '0.0',
-                'price24h': '0',
-                'balance': '0',
-                'balanceParsed': stringBalance,
-                'fiatValue': '0',
-              },
-          });
+          refreshAllTokenListMap(tokenMap);
           const mergedTokens = tokens;
           if (mergedTokens && mergedTokens.length) {
             void backgroundApiProxy.serviceToken.updateLocalTokens({

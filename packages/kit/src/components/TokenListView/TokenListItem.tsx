@@ -93,7 +93,7 @@ function TokenListItem(props: ITokenListItemProps) {
             {tableLayout ? (
               <TokenPriceView $key={token.$key ?? ''} size="$bodyMd" />
             ) : null}
-            <TokenPriceChangeView $key={token.$key ?? ''} size="$bodyMd" />
+            {/* <TokenPriceChangeView $key={token.$key ?? ''} size="$bodyMd" /> */}
           </XStack>
         ) : null}
         <TokenValueView

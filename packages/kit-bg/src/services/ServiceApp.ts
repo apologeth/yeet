@@ -17,6 +17,7 @@ import extUtils from '@onekeyhq/shared/src/utils/extUtils';
 import localDb from '../dbs/local/localDb';
 
 import ServiceBase from './ServiceBase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 @backgroundClass()
 class ServiceApp extends ServiceBase {
@@ -43,8 +44,16 @@ class ServiceApp extends ServiceBase {
 
   @backgroundMethod()
   async resetApp() {
+    await AsyncStorage.clear();
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      await AsyncStorage.multiRemove(keys);
+    } catch (error) {
+      console.error('Error clearing app data.');
+    }
     await localDb.reset();
     await appStorage.clear();
+    appStorage.clearSetting();
     await this.backgroundApi.serviceDiscovery.clearDiscoveryPageData();
     this.restartApp();
   }

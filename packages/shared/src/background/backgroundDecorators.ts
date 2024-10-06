@@ -94,18 +94,18 @@ function createBackgroundMethodDecorator({
       // );
     }
 
-    if (devOnly) {
-      // @ts-ignore
-      target[`${prefix}${methodName}`] = function (p1, ...others) {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const self = this;
-        checkDevOnlyPassword(p1, methodName);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return descriptor.value.call(self, p1, ...others);
-      };
-    } else {
-      target[`${prefix}${methodName}`] = descriptor.value;
-    }
+    // if (!devOnly) {
+    // @ts-ignore
+    target[`${prefix}${methodName}`] = function (p1, ...others) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const self = this;
+      // checkDevOnlyPassword(p1, methodName);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      return descriptor.value.call(self, p1, ...others);
+    };
+    // } else {
+    // target[`${prefix}${methodName}`] = descriptor.value;
+    // }
 
     // return PropertyDescriptor
     // descriptor.value.$isBackgroundMethod = true;

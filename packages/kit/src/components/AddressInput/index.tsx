@@ -150,6 +150,8 @@ type IAddressInputProps = Omit<
   accountId?: string;
   enableAddressInteractionStatus?: boolean; // for check address interaction
   enableVerifySendFundToSelf?: boolean; // To verify whether funds can be sent to one's own address.
+
+  isUseFiat?: boolean;
 };
 
 export type IAddressQueryResult = {
@@ -244,6 +246,7 @@ export function AddressInput(props: IAddressInputProps) {
     accountId,
     enableAddressInteractionStatus,
     enableVerifySendFundToSelf,
+    isUseFiat,
     ...rest
   } = props;
   const intl = useIntl();
@@ -300,16 +303,26 @@ export function AddressInput(props: IAddressInputProps) {
   );
 
   useEffect(() => {
-    void queryAddress({
-      address: inputText,
-      networkId,
-      accountId,
-      enableAddressBook,
-      enableAddressInteractionStatus,
-      enableNameResolve,
-      enableWalletName,
-      enableVerifySendFundToSelf,
-    });
+    if (!isUseFiat) {
+      void queryAddress({
+        address: inputText,
+        networkId,
+        accountId,
+        enableAddressBook,
+        enableAddressInteractionStatus,
+        enableNameResolve,
+        enableWalletName,
+        enableVerifySendFundToSelf,
+      });
+    } else {
+      if (inputText) {
+        setQueryResult({
+          input: inputText,
+          resolveAddress: inputText,
+          validStatus: 'valid',
+        });
+      }
+    }
   }, [
     inputText,
     networkId,
@@ -321,6 +334,7 @@ export function AddressInput(props: IAddressInputProps) {
     enableVerifySendFundToSelf,
     refreshNum,
     queryAddress,
+    isUseFiat,
   ]);
 
   const getValidateMessage = useCallback(
@@ -441,8 +455,10 @@ export function AddressInput(props: IAddressInputProps) {
       });
     }
 
-    return intl.formatMessage({ id: ETranslations.send_to_placeholder });
-  }, [intl, networkId]);
+    return isUseFiat
+      ? 'Email address'
+      : intl.formatMessage({ id: ETranslations.send_to_placeholder });
+  }, [intl, networkId, isUseFiat]);
 
   return (
     <BaseInput

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "scheme": "langit-wallet",
-    "name": "Langit Wallet",
-    "slug": "langit-wallet",
+    "scheme": "x0",
+    "name": "x0",
+    "slug": "x0",
     "owner": "soultan",
     "version": "1.0.0",
     "orientation": "portrait",

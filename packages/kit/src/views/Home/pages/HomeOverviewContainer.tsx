@@ -26,6 +26,7 @@ import { useActiveAccount } from '../../../states/jotai/contexts/accountSelector
 import { showBalanceDetailsDialog } from '../components/BalanceDetailsDialog';
 
 import type { FontSizeTokens } from 'tamagui';
+import { useAllTokenListMapAtom } from '../../../states/jotai/contexts/tokenList';
 
 function HomeOverviewContainer() {
   const intl = useIntl();
@@ -38,48 +39,59 @@ function HomeOverviewContainer() {
     initialized: false,
     isRefreshing: false,
   });
+  const [allToken] = useAllTokenListMapAtom();
+  const [myBalance, setMyBalance] = useState(0);
 
   const [settings] = useSettingsPersistAtom();
+  const overview = {};
+  // const { result: overview } = usePromiseResult(
+  //   async () => {
+  //     if (!account || !network) return;
+  //     const r =
+  //       await backgroundApiProxy.serviceAccountProfile.fetchAccountDetails({
+  //         networkId: network.id,
+  //         accountId: account.id,
+  //         withNetWorth: true,
+  //         withNonce: false,
+  //       });
+  //     setOverviewState({
+  //       initialized: true,
+  //       isRefreshing: false,
+  //     });
+  //     return r;
+  //   },
+  //   [account, network],
+  //   {
+  //     debounced: POLLING_DEBOUNCE_INTERVAL,
+  //     pollingInterval: POLLING_INTERVAL_FOR_TOTAL_VALUE,
+  //   },
+  // );
 
-  const { result: overview } = usePromiseResult(
-    async () => {
-      if (!account || !network) return;
-      const r =
-        await backgroundApiProxy.serviceAccountProfile.fetchAccountDetails({
-          networkId: network.id,
-          accountId: account.id,
-          withNetWorth: true,
-          withNonce: false,
-        });
-      setOverviewState({
-        initialized: true,
-        isRefreshing: false,
-      });
-      return r;
-    },
-    [account, network],
-    {
-      debounced: POLLING_DEBOUNCE_INTERVAL,
-      pollingInterval: POLLING_INTERVAL_FOR_TOTAL_VALUE,
-    },
-  );
-
-  const { result: vaultSettings } = usePromiseResult(async () => {
-    if (!network) return;
-    const s = backgroundApiProxy.serviceNetwork.getVaultSettings({
-      networkId: network.id,
-    });
-    return s;
-  }, [network]);
+  const vaultSettings = {};
+  // const { result: vaultSettings } = usePromiseResult(async () => {
+  //   if (!network) return;
+  //   const s = backgroundApiProxy.serviceNetwork.getVaultSettings({
+  //     networkId: network.id,
+  //   });
+  //   return s;
+  // }, [network]);
 
   useEffect(() => {
-    if (account?.id && network?.id && wallet?.id) {
-      setOverviewState({
-        initialized: false,
-        isRefreshing: true,
-      });
+    if (allToken) {
+      setMyBalance(
+        Object.values(allToken).reduce((sum, item) => sum + item.fiatValue, 0),
+      );
     }
-  }, [account?.id, network?.id, wallet?.id]);
+  }, [allToken]);
+
+  // useEffect(() => {
+  //   if (account?.id && network?.id && wallet?.id) {
+  //     setOverviewState({
+  //       initialized: false,
+  //       isRefreshing: true,
+  //     });
+  //   }
+  // }, [account?.id, network?.id, wallet?.id]);
   const { md } = useMedia();
   const balanceDialogInstance = useRef<IDialogInstance | null>(null);
 
@@ -117,7 +129,7 @@ function HomeOverviewContainer() {
             : defaultBalanceSize
         }
       >
-        {balanceString}
+        {myBalance}
       </NumberSizeableText>
       {vaultSettings?.hasFrozenBalance ? (
         <IconButton

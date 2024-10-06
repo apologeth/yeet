@@ -754,6 +754,7 @@ const icons = {
   PlaylistOutline: () => import("./react/outline/Playlist"),
   PlusCircleOutline: () => import("./react/outline/PlusCircle"),
   PlusLargeOutline: () => import("./react/outline/PlusLarge"),
+  Rupiah: () => import("./react/outline/Rupiah"),
   PlusSmallOutline: () => import("./react/outline/PlusSmall"),
   PlusSquareOutline: () => import("./react/outline/PlusSquare"),
   PostcardOutline: () => import("./react/outline/Postcard"),

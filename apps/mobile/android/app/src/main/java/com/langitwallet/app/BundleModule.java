@@ -1,4 +1,4 @@
-package com.langitwallet.app;
+package com.xo.app;
 
 import androidx.annotation.NonNull;
 

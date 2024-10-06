@@ -8,6 +8,7 @@ import { ETranslations, LOCALES_OPTION } from '@onekeyhq/shared/src/locale';
 import { RESET_OVERLAY_Z_INDEX } from '@onekeyhq/shared/src/utils/overlayUtils';
 
 import backgroundApiProxy from '../../../background/instance/backgroundApiProxy';
+import { IClearCacheOnAppState } from '@onekeyhq/shared/types/setting';
 
 export function useLocaleOptions() {
   const intl = useIntl();
@@ -77,7 +78,13 @@ export function useResetApp(params?: { inAppStateLock: boolean }) {
         },
         testID: 'erase-data-confirm',
       },
-      onConfirm() {
+      async onConfirm(dialogInstance) {
+        const values = dialogInstance.getForm()?.getValues() as
+          | IClearCacheOnAppState
+          | undefined;
+        if (values) {
+          await backgroundApiProxy.serviceSetting.clearCacheOnApp(values);
+        }
         void backgroundApiProxy.serviceApp.resetApp();
       },
     });

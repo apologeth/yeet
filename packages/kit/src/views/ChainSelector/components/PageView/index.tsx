@@ -30,13 +30,16 @@ const ChainSelectorImmutableView: FC<IChainSelectorViewProps> = ({
   networks,
   networkId,
   onPressItem,
+  title,
 }) => {
   const intl = useIntl();
 
   return (
     <Page>
       <Page.Header
-        title={intl.formatMessage({ id: ETranslations.global_networks })}
+        title={
+          title || intl.formatMessage({ id: ETranslations.global_networks })
+        }
       />
       <Page.Body>
         <ImmutableView
@@ -106,6 +109,7 @@ export const ChainSelectorPageView: FC<IChainSelectorPageViewProps> = ({
   defaultTopNetworks,
   onPressItem,
   onTopNetworksChange,
+  title,
 }) =>
   editable ? (
     <ChainSelectorEditableView
@@ -118,6 +122,7 @@ export const ChainSelectorPageView: FC<IChainSelectorPageViewProps> = ({
   ) : (
     <ChainSelectorImmutableView
       networks={networks}
+      title={title}
       networkId={networkId}
       onPressItem={onPressItem}
     />

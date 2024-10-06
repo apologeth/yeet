@@ -22,10 +22,10 @@ export const mockStorage = new MockStorage();
 - Desktop | Web: WebStorage -> IndexedDB
  */
 
-if (process.env.NODE_ENV !== 'production') {
-  global.$$appStorage = appStorage;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  global.$$appStorage.print = createPrintMethod({ storage: appStorage });
-}
+// if (process.env.NODE_ENV !== 'production') {
+global.$$appStorage = appStorage;
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+global.$$appStorage.print = createPrintMethod({ storage: appStorage });
+// }
 
 export default buildAppStorageFactory(appStorage);

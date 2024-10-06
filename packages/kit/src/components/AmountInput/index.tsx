@@ -22,6 +22,7 @@ import { getSharedInputStyles } from '@onekeyhq/components/src/forms/Input/share
 import type { IFormFieldProps } from '@onekeyhq/components/src/forms/types';
 import { ETranslations } from '@onekeyhq/shared/src/locale';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
+import { Text } from 'tamagui';
 
 type IAmountInputFormItemProps = IFormFieldProps<
   string,
@@ -326,7 +327,9 @@ export function AmountInput({
     >
       <XStack>
         {InputElement}
-        {TokenSelectorTrigger}
+        <Stack>
+          {TokenSelectorTrigger}
+        </Stack>
       </XStack>
       <XStack justifyContent="space-between">
         <XStack

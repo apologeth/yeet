@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useRoute } from '@react-navigation/core';
+import { useFocusEffect, useRoute } from '@react-navigation/core';
 import BigNumber from 'bignumber.js';
 import { isNaN, isNil } from 'lodash';
 import { useIntl } from 'react-intl';
@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 import {
   Button,
   Form,
+  Icon,
   Input,
   Page,
   SizableText,
@@ -63,29 +64,21 @@ import type { RouteProp } from '@react-navigation/core';
 import { useAtom } from 'jotai';
 import { myAccountAtom } from '../../../../states/jotai/myAccountAtom';
 import { ethers } from 'ethers';
-import { Linking, Modal, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Modal,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import axios from 'axios';
+import { Text } from 'tamagui';
 
 function SendDataInputContainer() {
   const intl = useIntl();
   const media = useMedia();
-
-  const [isUseFiat, setIsUseFiat] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isMaxSend, setIsMaxSend] = useState(false);
-  const [settings] = useSettingsPersistAtom();
-  const navigation = useAppNavigation();
-
-  const [allTokens] = useAllTokenListAtom();
-  const [map] = useAllTokenListMapAtom();
-  const [transactionHash, setTransactionHash] = useState('');
-  const [transactionId, setTransactionId] = useState('');
-  const { copyText } = useClipboard();
-
   const route =
     useRoute<RouteProp<IModalSendParamList, EModalSendRoutes.SendDataInput>>();
-
-  const { serviceNFT, serviceToken } = backgroundApiProxy;
 
   const {
     networkId,
@@ -95,7 +88,28 @@ function SendDataInputContainer() {
     nfts,
     address,
     amount: sendAmount = '',
+    type,
+    isSourceAccount,
+    sourceTokens,
   } = route.params;
+
+  const [isUseFiat, setIsUseFiat] = useState(type === 'fiat');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMaxSend, setIsMaxSend] = useState(false);
+  const [isFirstTime, setFirstTime] = useState(true);
+  const [settings] = useSettingsPersistAtom();
+  const [isLoadingFiat, setLoadingFiat] = useState(false);
+  const navigation = useAppNavigation();
+
+  const [allTokens] = useAllTokenListAtom();
+  const [map] = useAllTokenListMapAtom();
+  const [transactionHash, setTransactionHash] = useState('');
+  const [transactionId, setTransactionId] = useState('');
+  const [maxFiatPrice, setMaxFiatPrice] = useState(0);
+  const { copyText } = useClipboard();
+
+  const { serviceNFT, serviceToken } = backgroundApiProxy;
+
   const nft = nfts?.[0];
   const [myAccount] = useAtom(myAccountAtom);
 
@@ -118,11 +132,15 @@ function SendDataInputContainer() {
 
   const [tokenListMap] = useTokenListMapAtom();
   const activeToken = useMemo(() => {
-    if (token) {
-      return map[token['$key']];
+    if (tokenInfo) {
+      if (isSourceAccount) {
+        return sourceTokens?.map[tokenInfo['$key']];
+      }
+      return map[tokenInfo['$key']];
     }
     return '';
-  }, [token]);
+  }, [tokenInfo, sourceTokens, isSourceAccount]);
+
 
   const {
     result: [
@@ -176,13 +194,14 @@ function SendDataInputContainer() {
           );
         const withCheckInscription =
           checkInscriptionProtectionEnabled && settings.inscriptionProtection;
-        tokenResp = await serviceToken.fetchTokensDetails({
-          networkId,
-          accountId,
-          contractList: [tokenInfo.address],
-          withFrozenBalance: true,
-          withCheckInscription,
-        });
+        // tokenResp = await serviceToken.fetchTokensDetails({
+        //   networkId,
+        //   accountId,
+        //   contractList: [tokenInfo.address],
+        //   withFrozenBalance: true,
+        //   withCheckInscription,
+        // });
+        tokenResp = [];
       }
 
       const vs = await backgroundApiProxy.serviceNetwork.getVaultSettings({
@@ -233,7 +252,6 @@ function SendDataInputContainer() {
   const form = useForm({
     defaultValues: {
       to: { raw: address } as IAddressInputValue,
-      shardKey: '',
       amount: sendAmount,
       nftAmount: sendAmount || '1',
       memo: '',
@@ -316,9 +334,15 @@ function SendDataInputContainer() {
         networkId,
         accountId,
         tokens: {
-          data: allTokens.tokens,
-          keys: allTokens.keys,
-          map,
+          data:
+            isSourceAccount && sourceTokens
+              ? sourceTokens?.data
+              : allTokens.tokens,
+          keys:
+            isSourceAccount && sourceTokens
+              ? sourceTokens?.keys
+              : allTokens.keys,
+          map: isSourceAccount && sourceTokens ? sourceTokens?.map : map,
         },
         onSelect: (data: IToken) => {
           setTokenInfo(data);
@@ -329,6 +353,8 @@ function SendDataInputContainer() {
     accountId,
     allTokens.keys,
     allTokens.tokens,
+    sourceTokens,
+    isSourceAccount,
     isSelectTokenDisabled,
     map,
     navigation,
@@ -340,12 +366,23 @@ function SendDataInputContainer() {
       let trxInterval;
       const getTrxProcess = async () => {
         const responseTrx = await axios.get(
-          'https://langitapi.blockchainworks.id/api/transactions/' + transactionId
+          'https://langitapi.blockchainworks.id/api/transactions/' +
+            transactionId,
         );
-        
+        console.log('RES', responseTrx?.data?.data);
         if (responseTrx?.data?.data?.transaction_hash) {
-          setTransactionHash(responseTrx.data.data.transaction_hash);
+          console.log('REEE', responseTrx?.data);
+          if (responseTrx?.data?.data?.status === 'FAILED') {
+            setTransactionHash('FAILED');
+          } else {
+            setTransactionHash(responseTrx.data.data.transaction_hash);
+          }
           clearInterval(trxInterval); // Clear the interval if transaction_hash is found
+        } else {
+          if (responseTrx?.data?.data?.status === 'FAILED') {
+            setTransactionHash('FAILED');
+            clearInterval(trxInterval);
+          }
         }
       };
 
@@ -360,37 +397,65 @@ function SendDataInputContainer() {
 
   const handleOnConfirm = useCallback(async () => {
     try {
-      if (!myAccount?.accountAbstractionAddress) return;
+      if (!myAccount?.account_abstraction_address) return;
+      if (isSourceAccount) {
+        alert('Submitted');
+        return;
+      }
       const toAddress = form.getValues('to').resolved;
       if (!toAddress) return;
       const realAmount = amount;
       setIsSubmitting(true);
 
-      try {
-        const responseTokens = await axios.get(
-          'https://langitapi.blockchainworks.id/api/tokens/',
+      let responseFiat;
+      if (isUseFiat) {
+        responseFiat = await axios.get(
+          'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+            realAmount,
         );
+      }
+
+      try {
+        const payload = {
+          'sender_address': myAccount?.account_abstraction_address,
+          'receiver_address': toAddress,
+          'sent_amount': isUseFiat
+            ? responseFiat?.data?.data?.token_amount
+            : realAmount,
+          'received_amount': isUseFiat ? Number(realAmount) : null,
+          'sent_token_address':
+            activeToken?.address ===
+            '0x0000000000000000000000000000000000000000'
+              ? null
+              : activeToken?.address,
+          'received_token_address':
+            activeToken?.address ===
+            '0x0000000000000000000000000000000000000000'
+              ? null
+              : activeToken?.address,
+          'shard_device': myAccount?.shard_device,
+          transfer_type: isUseFiat
+            ? activeToken?.address ===
+              '0x0000000000000000000000000000000000000000'
+              ? 'NATIVE_TO_FIAT'
+              : 'CRYPTO_TO_FIAT'
+            : activeToken?.address ===
+              '0x0000000000000000000000000000000000000000'
+            ? 'NATIVE_TO_NATIVE'
+            : 'CRYPTO_TO_CRYPTO',
+        };
+
+        console.log('PAYLOAD', payload);
 
         const response = await axios.post(
           'https://langitapi.blockchainworks.id/api/transactions',
-          {
-            'sender_address': myAccount?.accountAbstractionAddress,
-            'receiver_address': toAddress,
-            'sent_amount': realAmount,
-            'sent_token_address':
-              responseTokens?.data?.data[0]?.address ||
-              responseTokens?.data?.data['0']?.address,
-            'received_token_address':
-              responseTokens?.data?.data[0]?.address ||
-              responseTokens?.data?.data['0']?.address,
-            'shard_device': form.getValues('shardKey'),
-          },
+          payload,
         );
         setTransactionId(response?.data?.data?.transaction_id);
-
         console.log('SUCCESS SEND', response?.data);
       } catch (error) {
-        console.error('ERROIR SEND', error);
+        console.error('ERROIR SEND', error?.response?.data);
+        setIsSubmitting(false);
       }
 
       // await sendConfirm.navigationToSendConfirm({
@@ -433,6 +498,44 @@ function SendDataInputContainer() {
     sendConfirm,
     tokenDetails,
   ]);
+
+  const isSubmitDisabled = useMemo(() => {
+    if (isLoadingAssets || isSubmitting || toPending) return true;
+
+    if (!form.formState.isValid) {
+      return true;
+    }
+
+    if (isNFT && nft?.collectionType === ENFTType.ERC1155 && !nftAmount) {
+      return true;
+    }
+
+    if (!isNFT && !amount && displayAmountFormItem) {
+      return true;
+    }
+  }, [
+    isLoadingAssets,
+    isSubmitting,
+    toPending,
+    form.formState.isValid,
+    isNFT,
+    nft?.collectionType,
+    nftAmount,
+    amount,
+    displayAmountFormItem,
+  ]);
+
+  const maxAmount = useMemo(() => {
+    // if (isUseFiat) {
+    //   return tokenDetails?.fiatValue ?? '0';
+    // }
+    return activeToken?.balanceParsed ?? '0';
+  }, [
+    isUseFiat,
+    activeToken?.balanceParsed,
+    tokenDetails?.fiatValue,
+    activeToken,
+  ]);
   const handleValidateTokenAmount = useCallback(
     async (value: string) => {
       const amountBN = new BigNumber(value ?? 0);
@@ -440,8 +543,16 @@ function SendDataInputContainer() {
       let isInsufficientBalance = false;
       let isLessThanMinTransferAmount = false;
       if (isUseFiat) {
-        if (amountBN.isGreaterThan(activeToken?.balanceParsed)) {
+        if (amountBN.isGreaterThan(maxFiatPrice * Number(maxAmount))) {
           isInsufficientBalance = true;
+        }
+        const convertedValue = new BigNumber(
+          Number(
+            ((Number(form.watch('amount')) + 0.02) / maxFiatPrice).toFixed(2),
+          ) ?? 0,
+        );
+        if (convertedValue.isLessThan(2)) {
+          isLessThanMinTransferAmount = true;
         }
 
         // if (
@@ -480,7 +591,8 @@ function SendDataInputContainer() {
           {
             amount: BigNumber.max(
               tokenMinAmount,
-              vaultSettings?.minTransferAmount ?? '0',
+              // vaultSettings?.minTransferAmount ?? '0',
+              '2',
             ).toFixed(),
             token: tokenSymbol,
           },
@@ -514,46 +626,37 @@ function SendDataInputContainer() {
       form,
       accountId,
       networkId,
+      maxFiatPrice,
     ],
   );
 
-  const isSubmitDisabled = useMemo(() => {
-    if (isLoadingAssets || isSubmitting || toPending) return true;
-
-    if (!form.formState.isValid) {
-      return true;
+  const getTokenExchange = async (price) => {
+    setLoadingFiat(true);
+    try {
+      const response = await axios.get(
+        'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+          price,
+      );
+      if (response?.data) {
+        setMaxFiatPrice(Number(response?.data?.data?.price));
+      }
+    } catch (error) {
+    } finally {
+      setLoadingFiat(false);
+      setFirstTime(false);
     }
+  };
 
-    if (isNFT && nft?.collectionType === ENFTType.ERC1155 && !nftAmount) {
-      return true;
-    }
-
-    if (!isNFT && !amount && displayAmountFormItem) {
-      return true;
-    }
-  }, [
-    isLoadingAssets,
-    isSubmitting,
-    toPending,
-    form.formState.isValid,
-    isNFT,
-    nft?.collectionType,
-    nftAmount,
-    amount,
-    displayAmountFormItem,
-  ]);
-
-  const maxAmount = useMemo(() => {
+  useEffect(() => {
     if (isUseFiat) {
-      return tokenDetails?.fiatValue ?? '0';
+      const price = 100; // Replace with the actual price or state variable if necessary
+      const intervalId = setInterval(() => {
+        getTokenExchange(price);
+      }, 2000);
+      // Clean up interval on component unmount
+      return () => clearInterval(intervalId);
     }
-    return activeToken?.balanceParsed ?? '0';
-  }, [
-    isUseFiat,
-    activeToken?.balanceParsed,
-    tokenDetails?.fiatValue,
-    activeToken,
-  ]);
+  }, []); //
 
   const renderTokenDataInputForm = useCallback(
     () => (
@@ -585,14 +688,33 @@ function SendDataInputContainer() {
           },
         }}
       >
+        {isUseFiat && (
+          <Text style={{ position: 'absolute', right: 0 }}>Using</Text>
+        )}
+
         <AmountInput
           reversible
           enableMaxAmount
           balanceProps={{
             loading: isLoadingAssets,
-            value: maxAmount,
-            onPress: () => {
-              form.setValue('amount', maxAmount);
+            value: isUseFiat
+              ? `Rp ${Math.floor(maxFiatPrice * maxAmount * 100) / 100}`
+              : maxAmount,
+            onPress: async () => {
+              if (isUseFiat) {
+                setLoadingFiat(true);
+                try {
+                  form.setValue(
+                    'amount',
+                    String(Math.floor(maxFiatPrice * maxAmount * 100) / 100),
+                  );
+                } catch (error) {
+                } finally {
+                  setLoadingFiat(false);
+                }
+              } else {
+                form.setValue('amount', maxAmount);
+              }
               void form.trigger('amount');
               setIsMaxSend(true);
             },
@@ -808,6 +930,17 @@ function SendDataInputContainer() {
           {renderTokenDataInputForm()}
           {renderMemoForm()}
           {renderPaymentIdForm()}
+          {isUseFiat && form.watch('amount') && (
+            <Text style={{ marginTop: 8 }}>
+              You will sell estimately{' '}
+              {Number(
+                ((Number(form.watch('amount')) + 0.02) / maxFiatPrice).toFixed(
+                  2,
+                ),
+              )}{' '}
+              {tokenInfo?.symbol}
+            </Text>
+          )}
         </>
       );
     }
@@ -824,7 +957,13 @@ function SendDataInputContainer() {
   return (
     <Page scrollEnabled>
       <Page.Header
-        title={intl.formatMessage({ id: ETranslations.send_title })}
+        title={
+          isSourceAccount
+            ? 'Top Up'
+            : type === 'fiat'
+            ? 'Crypto To Fiat Payment'
+            : intl.formatMessage({ id: ETranslations.send_title })
+        }
       />
       <Page.Body px="$5" testID="send-recipient-amount-form">
         <AccountSelectorProviderMirror
@@ -869,60 +1008,68 @@ function SendDataInputContainer() {
                 </ListItem>
               </Form.Field>
             ) : null}
-            <Form.Field
-              label={intl.formatMessage({ id: ETranslations.global_recipient })}
-              name="to"
-              rules={{
-                required: true,
-                validate: (value: IAddressInputValue) => {
-                  if (value.pending) {
-                    return;
-                  }
-                  if (!value.resolved) {
-                    return (
-                      value.validateError?.message ??
-                      intl.formatMessage({
-                        id: ETranslations.send_address_invalid,
-                      })
-                    );
-                  }
-                },
-              }}
-            >
-              <AddressInput
-                accountId={accountId}
-                networkId={networkId}
-                enableAddressBook
-                enableWalletName
-                enableVerifySendFundToSelf
-                enableAddressInteractionStatus
-                contacts
-                accountSelector={{ num: 0 }}
-              />
-            </Form.Field>
+            {!isSourceAccount ? (
+              <Form.Field
+                label={intl.formatMessage({
+                  id: ETranslations.global_recipient,
+                })}
+                name="to"
+                rules={{
+                  required: true,
+                  validate: (value: IAddressInputValue) => {
+                    if (value.pending) {
+                      return;
+                    }
+                    if (!value.resolved) {
+                      return (
+                        value.validateError?.message ??
+                        intl.formatMessage({
+                          id: ETranslations.send_address_invalid,
+                        })
+                      );
+                    }
+                  },
+                }}
+              >
+                <AddressInput
+                  accountId={accountId}
+                  networkId={networkId}
+                  enableAddressBook
+                  enableWalletName
+                  enableVerifySendFundToSelf
+                  enableAddressInteractionStatus
+                  contacts
+                  accountSelector={{ num: 0 }}
+                  isUseFiat={isUseFiat}
+                />
+              </Form.Field>
+            ) : (
+              <View />
+            )}
             {renderDataInput()}
-            <Form.Field
-              label={'Your shard key'}
-              name="shardKey"
-              rules={{
-                required: true,
-              }}
-            >
-              <Input />
-            </Form.Field>
           </Form>
         </AccountSelectorProviderMirror>
       </Page.Body>
       <Page.Footer
         onConfirm={handleOnConfirm}
-        onConfirmText={intl.formatMessage({
-          id: ETranslations.send_preview_button,
-        })}
+        onConfirmText={type === 'fiat' ? 'Pay to Fiat' : 'Submit'}
         confirmButtonProps={{
           disabled: isSubmitDisabled,
           loading: isSubmitting,
         }}
       />
+      <Modal transparent visible={isLoadingFiat && isFirstTime}>
+        <View
+          style={{
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ActivityIndicator />
+        </View>
+      </Modal>
       <Modal transparent visible={!!transactionHash}>
         <View
           style={{
@@ -942,33 +1089,79 @@ function SendDataInputContainer() {
               padding: 20,
             }}
           >
-            <Text
-              style={{
-                fontSize: 20,
-                marginBottom: 24,
-                textAlign: 'center',
-                color: 'white',
+            <TouchableOpacity
+              style={{ alignSelf: 'flex-end' }}
+              hitSlop={{
+                top: 16,
+                right: 16,
+                left: 16,
+                bottom: 16,
+              }}
+              onPress={() => {
+                setTransactionHash(null);
+                navigation.popStack();
               }}
             >
-              Your transaction hash is:{'\n'}
-              {transactionHash}
-            </Text>
+              <Icon name="CrossedSmallSolid" color="white" size="$8" />
+            </TouchableOpacity>
+            {transactionHash === 'FAILED' ? (
+              <Text
+                style={{
+                  fontSize: 20,
+                  marginBottom: 24,
+                  textAlign: 'center',
+                  color: 'white',
+                  marginTop: 16,
+                }}
+              >
+                Your transaction has failed
+              </Text>
+            ) : (
+              <Text
+                style={{
+                  fontSize: 20,
+                  marginBottom: 24,
+                  textAlign: 'center',
+                  color: 'white',
+                  marginTop: 16,
+                }}
+              >
+                Your transaction hash is:{'\n'}
+                {transactionHash}
+              </Text>
+            )}
             <Button
-              style={{ color: 'white' }}
-              onPress={() => {
-                Linking.openURL(
-                  'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz/tx/' +
-                    transactionHash,
-                );
+              style={{ color: 'white', borderWidth: 1, borderColor: 'white' }}
+              onPress={async () => {
+                copyText(transactionHash);
+              }}
+            >
+              Copy transaction hash
+            </Button>
+            <Button
+              style={{
+                color: 'white',
+                borderWidth: 1,
+                borderColor: 'white',
+                marginTop: 8,
+              }}
+              onPress={async () => {
                 copyText(
-                  'https://explorer-langit-testnet-9osqsm6ktp.t.conduit.xyz/tx/' +
-                    transactionHash,
+                  'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz/tx/' +
+                    transactionHash +
+                    '?tab=state',
                 );
+                await Linking.openURL(
+                  'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz/tx/' +
+                    transactionHash +
+                    '?tab=state',
+                );
+
                 navigation.popStack();
                 setTransactionHash('');
               }}
             >
-              Copy URL & Open transaction detail in browser
+              Open transaction detail in browser
             </Button>
           </View>
         </View>

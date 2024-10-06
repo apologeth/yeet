@@ -139,7 +139,6 @@ function RecoveryInput({ userInfo, onClose }: any) {
 
   const navigation = useAppNavigation();
   const [myAccount, setMyAccount] = useAtom(myAccountAtom);
-
   const [secureEntry, setSecureEntry] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -168,7 +167,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
         },
         {
           headers: {
-            Authorization: `Bearer ${responseToken?.data?.data?.accessToken}`,
+            Authorization: `Bearer ${responseToken?.data?.data?.access_token}`,
           },
         },
       );
@@ -178,7 +177,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
           response?.data?.data?.id,
         {
           headers: {
-            Authorization: `Bearer ${response?.data?.data?.accessToken}`,
+            Authorization: `Bearer ${response?.data?.data?.access_token}`,
           },
         },
       );
@@ -191,8 +190,8 @@ function RecoveryInput({ userInfo, onClose }: any) {
           imageUrl: userInfo?.user?.photo || '',
           idToken: userInfo?.idToken || '',
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          accessToken: responseToken?.data?.data?.accessToken,
-          refreshToken: responseToken?.data?.data?.refreshToken,
+          accessToken: responseToken?.data?.data?.access_token,
+          refreshToken: responseToken?.data?.data?.refresh_token,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           ...response?.data?.data,
           ...responseAccount?.data?.data,
@@ -298,6 +297,7 @@ export function GetStarted({
   const { showCloseButton } = route.params || {};
   const [myAccount, setMyAccount] = useAtom(myAccountAtom);
   const [isLoading, setLoading] = useState(false);
+  console.log("MY ACCC", myAccount)
 
   const handleCreateWalletPress = async () => {
     // await backgroundApiProxy.servicePassword.promptPasswordVerify();
@@ -308,7 +308,7 @@ export function GetStarted({
       await GoogleSignin.hasPlayServices();
       userInfo = await GoogleSignin.signIn();
       // const token = await GoogleSignin.getTokens();
-
+      console.log('USER IFFO', userInfo);
       const responseToken = await axios.post(
         'https://langitapi.blockchainworks.id/api/clients/login',
         {
@@ -317,50 +317,56 @@ export function GetStarted({
         },
       );
 
+      console.log('LOGIN SCLIENT', responseToken?.data);
+
       const response = await axios.post(
         'https://langitapi.blockchainworks.id/api/accounts/google-auth',
         {
-          google_code: userInfo?.serverAuthCode,
+          google_code: userInfo?.data?.serverAuthCode,
+          fiat_wallet_id: '0000000816222512',
         },
         {
           headers: {
-            Authorization: `Bearer ${responseToken?.data?.data?.accessToken}`,
+            Authorization: `Bearer ${responseToken?.data?.data?.access_token}`,
           },
         },
       );
+
+      console.log('LOGIN GOOGLE AUTH', response?.data);
 
       const responseAccount = await axios.get(
         'https://langitapi.blockchainworks.id/api/accounts/' +
           response?.data?.data?.id,
         {
           headers: {
-            Authorization: `Bearer ${response?.data?.data?.accessToken}`,
+            Authorization: `Bearer ${response?.data?.data?.access_token}`,
           },
         },
       );
 
       if (response?.status === 200) {
         setMyAccount({
-          accountName: userInfo?.user?.name || '',
-          email: userInfo?.user?.email,
-          imageUrl: userInfo?.user?.photo || '',
-          idToken: userInfo?.idToken || '',
+          accountName: userInfo?.data?.user?.name || '',
+          email: userInfo?.data?.user?.email,
+          imageUrl: userInfo?.data?.user?.photo || '',
+          idToken: userInfo?.data?.idToken || '',
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          accessToken: response?.data?.data?.accessToken,
+          accessToken: response?.data?.data?.access_token,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          refreshToken: response?.data?.data?.refreshToken,
+          refreshToken: response?.data?.data?.refresh_token,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          'address': response?.data?.data?.address,
+          'address': responseAccount?.data?.data?.address,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          'accountAbstractionAddress':
-            response?.data?.data?.accountAbstractionAddress,
+          'account_abstraction_address':
+            responseAccount?.data?.data?.account_abstraction_address,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          'shardDevice': response?.data?.data?.shardDevice,
+          'shardDevice': response?.data?.data?.shard_device,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          ...response?.data?.data,
           ...responseAccount?.data?.data,
         });
-        // // await GoogleSignin.signOut();
-        // // await GoogleSignin.revokeAccess();
+        // await GoogleSignin.signOut();
+        // await GoogleSignin.revokeAccess();
         navigation.navigate(ERootRoutes.Main);
       } else {
         await GoogleSignin.signOut();
@@ -390,7 +396,7 @@ export function GetStarted({
               'You need to enter your secret key to recover your account',
             renderContent: (
               <RecoveryInput
-                userInfo={userInfo}
+                userInfo={userInfo?.data}
                 onClose={() => dialog.close()}
               />
             ),
@@ -492,8 +498,8 @@ export function GetStarted({
             justifyContent="center"
           >
             <Image
-              w={360}
-              h={360}
+              w={240}
+              h={240}
               source={require('@onekeyhq/kit/assets/logo-press.png')}
             />
           </ThemeableStack>
@@ -569,14 +575,14 @@ export function GetStarted({
                     onPress: handleCreateWalletPress,
                     testID: 'create-wallet',
                   },
-                  {
-                    iconName: 'ArrowBottomCircleOutline',
-                    label: intl.formatMessage({
-                      id: ETranslations.global_import_wallet,
-                    }),
-                    onPress: handleImportWalletPress,
-                    testID: 'import-wallet',
-                  },
+                  // {
+                  //   iconName: 'ArrowBottomCircleOutline',
+                  //   label: intl.formatMessage({
+                  //     id: ETranslations.global_import_wallet,
+                  //   }),
+                  //   onPress: handleImportWalletPress,
+                  //   testID: 'import-wallet',
+                  // },
                 ]}
               />
             )

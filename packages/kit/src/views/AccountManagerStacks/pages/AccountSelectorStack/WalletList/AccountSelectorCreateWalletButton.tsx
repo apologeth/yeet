@@ -19,10 +19,11 @@ export function AccountSelectorCreateWalletButton() {
 
   const navigation = useAppNavigation();
   const route = useAccountSelectorRoute();
+
   // const linkNetwork = route.params?.linkNetwork;
   const isEditableRouteParams = route.params?.editable;
 
-  if (!isEditableRouteParams) {
+  if (isEditableRouteParams) {
     return null;
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -30,7 +31,7 @@ export function AccountSelectorCreateWalletButton() {
     <IconButton
       onPress={() => {
         navigation.pushModal(EModalRoutes.OnboardingModal, {
-          screen: EOnboardingPages.GetStarted,
+          screen: EOnboardingPages.ImportPrivateKey,
           params: {
             showCloseButton: true,
           },
