@@ -31,6 +31,7 @@ const ChainSelectorImmutableView: FC<IChainSelectorViewProps> = ({
   networkId,
   onPressItem,
   title,
+  address,
 }) => {
   const intl = useIntl();
 
@@ -45,6 +46,7 @@ const ChainSelectorImmutableView: FC<IChainSelectorViewProps> = ({
         <ImmutableView
           networkId={networkId}
           networks={networks}
+          address={address}
           onPressItem={onPressItem}
         />
       </Page.Body>
@@ -110,14 +112,16 @@ export const ChainSelectorPageView: FC<IChainSelectorPageViewProps> = ({
   onPressItem,
   onTopNetworksChange,
   title,
-}) =>
-  editable ? (
+  address,
+}) => {
+  return editable ? (
     <ChainSelectorEditableView
       networks={networks}
       networkId={networkId}
       defaultTopNetworks={defaultTopNetworks}
       onPressItem={onPressItem}
       onTopNetworksChange={onTopNetworksChange}
+      address={address}
     />
   ) : (
     <ChainSelectorImmutableView
@@ -125,5 +129,7 @@ export const ChainSelectorPageView: FC<IChainSelectorPageViewProps> = ({
       title={title}
       networkId={networkId}
       onPressItem={onPressItem}
+      address={address}
     />
   );
+};

@@ -303,26 +303,33 @@ export function AddressInput(props: IAddressInputProps) {
   );
 
   useEffect(() => {
-    if (!isUseFiat) {
-      void queryAddress({
-        address: inputText,
-        networkId,
-        accountId,
-        enableAddressBook,
-        enableAddressInteractionStatus,
-        enableNameResolve,
-        enableWalletName,
-        enableVerifySendFundToSelf,
+    if (inputText) {
+      setQueryResult({
+        input: inputText,
+        resolveAddress: inputText,
+        validStatus: 'valid',
       });
-    } else {
-      if (inputText) {
-        setQueryResult({
-          input: inputText,
-          resolveAddress: inputText,
-          validStatus: 'valid',
-        });
-      }
     }
+    // if (!isUseFiat) {
+    //   void queryAddress({
+    //     address: inputText,
+    //     networkId,
+    //     accountId,
+    //     enableAddressBook,
+    //     enableAddressInteractionStatus,
+    //     enableNameResolve,
+    //     enableWalletName,
+    //     enableVerifySendFundToSelf,
+    //   });
+    // } else {
+    //   if (inputText) {
+    //     setQueryResult({
+    //       input: inputText,
+    //       resolveAddress: inputText,
+    //       validStatus: 'valid',
+    //     });
+    //   }
+    // }
   }, [
     inputText,
     networkId,

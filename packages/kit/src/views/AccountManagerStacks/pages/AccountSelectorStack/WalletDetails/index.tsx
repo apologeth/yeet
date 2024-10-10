@@ -612,14 +612,16 @@ export function WalletDetails({ num }: IWalletDetailsProps) {
                   // }
                   // navigation.popStack();
                   // item?.address
-                  openChainSelector({
+                   openChainSelector({
                     title: 'Source Network',
                     networkIds: selectorNetworks.map((o) => o.id),
                     defaultNetworkId: current?.id,
+                    address: item?.address,
                     notBack: true,
                     onSelect: async (networkParam) => {
                       let r = {};
                       setLoading(true);
+
                       if (networkParam?.chainId !== '170845') {
                         try {
                           const blockedTokens =

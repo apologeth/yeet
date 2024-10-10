@@ -117,7 +117,7 @@ function ActionSwap(props: IActionItemsProps) {
   const intl = useIntl();
   return (
     <ActionItem
-      label={intl.formatMessage({ id: ETranslations.global_swap })}
+      label={"Buy"}
       icon="SwitchHorOutline"
       {...props}
     />

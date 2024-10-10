@@ -109,18 +109,18 @@ function NetworkSelectorTriggerHomeCmp({ num }: { num: number }) {
         },
       }}
       userSelect="none"
-      onPress={showChainSelector}
+      // onPress={showChainSelector}
     >
       <NetworkAvatar networkId={network?.id} size="$5" />
       <SizableText pl="$2" size="$bodyMd" flexShrink={1} numberOfLines={1}>
         {network?.name}
       </SizableText>
-      <Icon
+      {/* <Icon
         name="ChevronDownSmallOutline"
         color="$iconSubdued"
         size="$5"
         flexShrink={0}
-      />
+      /> */}
     </XStack>
   );
 }

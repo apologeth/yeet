@@ -24,7 +24,9 @@ export default function ChainSelectorPage({
     title = 'Networks',
     enableDangerNetwork,
     notBack,
+    address,
   } = route.params ?? {};
+
   const { result } = usePromiseResult(async () => {
     let networks: IServerNetwork[] = [];
     if (networkIds && networkIds.length > 0) {
@@ -47,6 +49,7 @@ export default function ChainSelectorPage({
       title={title}
       networkId={defaultNetworkId}
       networks={result ?? []}
+      address={address}
       onPressItem={(network) => {
         onSelect?.(network);
         if (!notBack) {

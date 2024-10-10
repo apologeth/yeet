@@ -141,7 +141,6 @@ function SendDataInputContainer() {
     return '';
   }, [tokenInfo, sourceTokens, isSourceAccount]);
 
-
   const {
     result: [
       tokenDetails,
@@ -443,6 +442,7 @@ function SendDataInputContainer() {
               '0x0000000000000000000000000000000000000000'
             ? 'NATIVE_TO_NATIVE'
             : 'CRYPTO_TO_CRYPTO',
+          type: 'TRANSFER',
         };
 
         console.log('PAYLOAD', payload);

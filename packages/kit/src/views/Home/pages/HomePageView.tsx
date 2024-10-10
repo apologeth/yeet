@@ -221,8 +221,8 @@ export function HomePageView({
       <>
         <TabPageHeader showHeaderRight sceneName={sceneName} />
         <Page.Body>
-          <UpdateReminder />
-          <HomeFirmwareUpdateReminder />
+          {/* <UpdateReminder /> */}
+          {/* <HomeFirmwareUpdateReminder /> */}
           {content}
         </Page.Body>
       </>

@@ -19,6 +19,8 @@ import localDb from '../dbs/local/localDb';
 import ServiceBase from './ServiceBase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
 @backgroundClass()
 class ServiceApp extends ServiceBase {
   constructor({ backgroundApi }: { backgroundApi: any }) {
@@ -44,6 +46,10 @@ class ServiceApp extends ServiceBase {
 
   @backgroundMethod()
   async resetApp() {
+    if (GoogleSignin.hasPreviousSignIn()) {
+      await GoogleSignin.signOut();
+      await GoogleSignin.revokeAccess();
+    }
     await AsyncStorage.clear();
     try {
       const keys = await AsyncStorage.getAllKeys();
@@ -54,6 +60,7 @@ class ServiceApp extends ServiceBase {
     await localDb.reset();
     await appStorage.clear();
     appStorage.clearSetting();
+
     await this.backgroundApi.serviceDiscovery.clearDiscoveryPageData();
     this.restartApp();
   }

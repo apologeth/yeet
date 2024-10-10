@@ -15,7 +15,7 @@ type IProps = {
 } & ISizableTextProps;
 
 function TokenBalanceView(props: IProps) {
-  const { $key, symbol, ...rest } = props;
+  const { $key, symbol, value, ...rest } = props;
   const [tokenListMap] = useTokenListMapAtom();
   const [allToken] = useAllTokenListMapAtom();
   const token = tokenListMap[$key || ''];
@@ -27,7 +27,7 @@ function TokenBalanceView(props: IProps) {
         formatterOptions={{ tokenSymbol: symbol }}
         {...rest}
       >
-        {token?.balanceParsed || allToken[$key]?.balanceParsed || '0'}
+        {value || token?.balanceParsed || allToken[$key]?.balanceParsed || '0'}
       </NumberSizeableText>
     ),
     [rest, symbol, token?.balanceParsed],

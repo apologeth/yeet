@@ -18,6 +18,7 @@ type IImmutableViewProps = {
 export const ImmutableView: FC<IImmutableViewProps> = ({
   networks,
   networkId,
+  address,
   onPressItem,
 }) => {
   const [text, setText] = useState('');
@@ -45,6 +46,7 @@ export const ImmutableView: FC<IImmutableViewProps> = ({
         networkId={networkId}
         networks={data}
         onPressItem={onPressItem}
+        address={address}
       />
     </Stack>
   );

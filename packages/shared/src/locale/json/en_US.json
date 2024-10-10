@@ -1116,7 +1116,7 @@
   "send.to_contacts_tooltip": "Contacts",
   "send.to_ln_placeholder": "Enter Invoice, Lightning Address, LNURL or Node ID",
   "send.to_paste_tooltip": "Paste",
-  "send.to_placeholder": "Enter address or domain name",
+  "send.to_placeholder": "Enter address or email",
   "send.to_scan_tooltip": "Scan",
   "send.toast_btc_fork_insufficient_fund": "Please try a smaller amount",
   "send.verification_failure": "Verification failed.",
