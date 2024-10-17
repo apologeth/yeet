@@ -13,6 +13,7 @@ import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import appStorage from '@onekeyhq/shared/src/storage/appStorage';
 import type { IOpenUrlRouteInfo } from '@onekeyhq/shared/src/utils/extUtils';
 import extUtils from '@onekeyhq/shared/src/utils/extUtils';
+import * as Keychain from 'react-native-keychain';
 
 import localDb from '../dbs/local/localDb';
 
@@ -59,6 +60,8 @@ class ServiceApp extends ServiceBase {
     }
     await localDb.reset();
     await appStorage.clear();
+    // Reset the stored credentials
+    await Keychain.resetGenericPassword();
     appStorage.clearSetting();
 
     await this.backgroundApi.serviceDiscovery.clearDiscoveryPageData();

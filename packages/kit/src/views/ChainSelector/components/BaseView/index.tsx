@@ -21,7 +21,7 @@ import { TokenBalanceView } from '../../../../components/TokenListView/TokenBala
 import { TokenNameView } from '../../../../components/TokenListView/TokenNameView';
 import { Token } from '../../../../components/Token';
 import { withTokenListProvider } from '../../../../states/jotai/contexts/tokenList';
-import { ActivityIndicator, Modal } from 'react-native';
+import { ActivityIndicator, Modal, TouchableOpacity } from 'react-native';
 
 const ListEmptyComponent = () => {
   const intl = useIntl();
@@ -183,7 +183,7 @@ const ListItemReal = ({ item, onPressItem, networkId, address }) => {
           map: tokenMap,
           keys: item?.chainId,
         };
-console.log("asd", r?.data)
+        console.log('asd', r?.data);
         setData(r?.data);
       } catch (e) {
       } finally {
@@ -202,7 +202,7 @@ console.log("asd", r?.data)
             justifyContent: 'center',
           }}
         >
-          <ActivityIndicator />
+          <ActivityIndicator size={40} color={'white'} />
         </View>
       </Modal>
       <ListItem
@@ -216,7 +216,9 @@ console.log("asd", r?.data)
         }
         title={item?.name}
         titleMatch={item.titleMatch}
-        onPress={() => onPressItem?.(item)}
+        onPress={() => {
+          // onPressItem?.(item)
+        }}
         testID={`select-item-${item.id}`}
       >
         {/* {networkId === item.id ? (
@@ -231,44 +233,48 @@ console.log("asd", r?.data)
       </ListItem>
       {data?.map((token) => {
         return (
-          <View
+          <TouchableOpacity
             key={token?.name}
-            paddingLeft={60}
-            paddingVertical={8}
-            paddingRight={40}
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-            gap={8}
+            onPress={() => onPressItem?.(token, item)}
           >
-            <Token size={'md'} tokenImageUri={token.logoURI} />
-            <Stack flexGrow={1} flexBasis={0}>
-              <XStack>
-                <TokenNameView
-                  size="$bodyLgMedium"
-                  numberOfLines={1}
-                  name={token.name}
-                  isNative={token.isNative}
+            <View
+              paddingLeft={60}
+              paddingVertical={8}
+              paddingRight={40}
+              flexDirection="row"
+              justifyContent="space-between"
+              alignItems="center"
+              gap={8}
+            >
+              <Token size={'md'} tokenImageUri={token.logoURI} />
+              <Stack flexGrow={1} flexBasis={0}>
+                <XStack>
+                  <TokenNameView
+                    size="$bodyLgMedium"
+                    numberOfLines={1}
+                    name={token.name}
+                    isNative={token.isNative}
+                  />
+                </XStack>
+                <TokenBalanceView
+                  size="$bodyMd"
+                  color="$textSubdued"
+                  $key={token.$key ?? ''}
+                  value={token?.balanceParsed}
+                  symbol={token.symbol}
                 />
-              </XStack>
-              <TokenBalanceView
-                size="$bodyMd"
-                color="$textSubdued"
-                $key={token.$key ?? ''}
-                value={token?.balanceParsed}
-                symbol={token.symbol}
-              />
-            </Stack>
+              </Stack>
 
-            <Stack flexDirection="column-reverse" alignItems="flex-end">
-              <TokenValueView
-                value={token?.fiatValue}
-                $key={token.$key ?? ''}
-                size="$bodyLgMedium"
-                textAlign="right"
-              />
-            </Stack>
-          </View>
+              <Stack flexDirection="column-reverse" alignItems="flex-end">
+                <TokenValueView
+                  value={token?.fiatValue}
+                  $key={token.$key ?? ''}
+                  size="$bodyLgMedium"
+                  textAlign="right"
+                />
+              </Stack>
+            </View>
+          </TouchableOpacity>
         );
       })}
     </View>

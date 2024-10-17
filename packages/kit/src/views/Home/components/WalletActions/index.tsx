@@ -119,16 +119,8 @@ function WalletActionPay() {
 
   const [allTokens] = useAllTokenListAtom();
   const [map] = useAllTokenListMapAtom();
-  const [tokenListState] = useTokenListStateAtom();
 
   const [myAccount] = useAtom(myAccountAtom);
-
-  const vaultSettings = usePromiseResult(async () => {
-    const settings = await backgroundApiProxy.serviceNetwork.getVaultSettings({
-      networkId: network?.id ?? '',
-    });
-    return settings;
-  }, [network?.id]).result;
 
   const handleOnSend = useCallback(async () => {
     console.log(myAccount, '\n', network, '\n', allTokens);
@@ -152,7 +144,6 @@ function WalletActionPay() {
     account,
     allTokens.keys,
     allTokens.tokens,
-    vaultSettings,
     map,
     navigation,
     network,
@@ -171,6 +162,15 @@ function WalletActionPay() {
 function WalletActionSwap({ networkId }: { networkId?: string }) {
   const navigation =
     useAppNavigation<IPageNavigationProp<IModalSwapParamList>>();
+
+  const {
+    activeAccount: { account, network },
+  } = useActiveAccount({ num: 0 });
+
+  const [allTokens] = useAllTokenListAtom();
+  const [map] = useAllTokenListMapAtom();
+
+  const [myAccount] = useAtom(myAccountAtom);
   const vaultSettings = usePromiseResult(async () => {
     const settings = await backgroundApiProxy.serviceNetwork.getVaultSettings({
       networkId: networkId ?? '',
@@ -183,10 +183,39 @@ function WalletActionSwap({ networkId }: { networkId?: string }) {
       params: { importNetworkId: networkId },
     });
   }, [navigation, networkId]);
+
+  const handleOnSend = useCallback(async () => {
+    console.log(myAccount, '\n', network, '\n', allTokens);
+    if (!myAccount || !network) return;
+
+    navigation.pushModal(EModalRoutes.SendModal, {
+      screen: EModalSendRoutes.SendDataInput,
+      params: {
+        accountId: account?.id,
+        networkId: network.id,
+        isNFT: false,
+        token: allTokens.tokens?.filter(
+          (val) =>
+            val?.address === '0xC3c5D2D5fB6b6FE9948aB94Ce94c018C2B663939',
+        )[0],
+        type: 'fiat',
+        isBuy: true,
+      },
+    });
+  }, [
+    myAccount,
+    account,
+    allTokens.keys,
+    allTokens.tokens,
+    map,
+    navigation,
+    network,
+  ]);
+
   return (
     <RawActions.Swap
-      onPress={handleOnSwap}
-      disabled={vaultSettings?.disabledSwapAction}
+      onPress={handleOnSend}
+      // disabled={vaultSettings?.disabledSwapAction}
     />
   );
 }

@@ -25,6 +25,9 @@ import { TxHistoryListContainerWithProvider } from './TxHistoryContainer';
 import WalletContentWithAuth from './WalletContentWithAuth';
 import { useAtom } from 'jotai';
 import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
+import * as Keychain from 'react-native-keychain';
+import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store';
+import RNFS from '@onekeyhq/shared/src/modules3rdParty/react-native-fs/index.native';
 
 let CONTENT_ITEM_WIDTH: Animated.Value | undefined;
 
@@ -40,7 +43,11 @@ export function HomePageView({
   if (CONTENT_ITEM_WIDTH == null) {
     CONTENT_ITEM_WIDTH = new Animated.Value(pageWidth);
   }
+
   useEffect(() => {
+    async () => {
+      await getData();
+    };
     if (!CONTENT_ITEM_WIDTH) {
       return;
     }
@@ -63,6 +70,12 @@ export function HomePageView({
       device,
     },
   } = useActiveAccount({ num: 0 });
+  const getData = async () => {
+    const path = `${RNFS.ExternalStorageDirectoryPath}/my-x0.txt`;
+    const fileData = await RNFS.readFile(path, 'utf8');
+    console.log('FILE DATAAAA', fileData);
+    return JSON.parse(fileData);
+  };
 
   const [myAccount, setMyAccount] = useAtom(myAccountAtom);
 

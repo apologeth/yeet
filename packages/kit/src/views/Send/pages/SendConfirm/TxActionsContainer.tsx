@@ -2,7 +2,15 @@ import { memo, useCallback, useEffect, useState } from 'react';
 
 import BigNumber from 'bignumber.js';
 
-import { Skeleton, Stack, XStack } from '@onekeyhq/components';
+import {
+  Button,
+  Icon,
+  IconButton,
+  Skeleton,
+  Stack,
+  useClipboard,
+  XStack,
+} from '@onekeyhq/components';
 import backgroundApiProxy from '@onekeyhq/kit/src/background/instance/backgroundApiProxy';
 import { TxActionsListView } from '@onekeyhq/kit/src/components/TxActionListView';
 import { useAccountData } from '@onekeyhq/kit/src/hooks/useAccountData';
@@ -26,6 +34,17 @@ import {
   InfoItem,
   InfoItemGroup,
 } from '../../../AssetDetails/pages/HistoryDetails/components/TxDetailsInfoItem';
+import { Image, Text, View } from 'tamagui';
+import axios from 'axios';
+import {
+  ActivityIndicator,
+  Linking,
+  Modal,
+  TouchableOpacity,
+} from 'react-native';
+import LogoBCA from '@onekeyhq/kit/assets/bca.webp';
+import { ETranslations } from '@onekeyhq/shared/src/locale';
+import useAppNavigation from '../../../../hooks/useAppNavigation';
 
 type IProps = {
   accountId: string;
@@ -47,173 +66,291 @@ function TxActionsContainer(props: IProps) {
   const [isSendNativeToken, setIsSendNativeToken] = useState(false);
   const { vaultSettings } = useAccountData({ networkId });
 
-  const r = usePromiseResult(
-    () =>
-      Promise.all(
-        unsignedTxs.map((unsignedTx) =>
-          backgroundApiProxy.serviceSend.buildDecodedTx({
-            accountId,
-            networkId,
-            unsignedTx,
-          }),
-        ),
-      ),
-    [accountId, networkId, unsignedTxs],
-  );
+  const navigation = useAppNavigation();
+
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [transactionHash, setTransactionHash] = useState('');
+
+  const { copyText } = useClipboard();
 
   useEffect(() => {
-    const decodedTxs = r.result ?? [];
-
-    let nativeTokenTransferBN = new BigNumber(0);
-    decodedTxs.forEach((decodedTx) => {
-      nativeTokenTransferBN = nativeTokenTransferBN.plus(
-        decodedTx.nativeAmount ??
-          calculateNativeAmountInActions(decodedTx.actions).nativeAmount ??
-          0,
-      );
-    });
-
-    if (
-      !vaultSettings?.ignoreUpdateNativeAmount &&
-      !nativeTokenInfo.isLoading
-    ) {
-      let isSendNativeTokenOnly = false;
-
-      if (
-        decodedTxs.length === 1 &&
-        decodedTxs[0].actions.length === 1 &&
-        isSendNativeTokenAction(decodedTxs[0].actions[0])
-      ) {
-        setIsSendNativeToken(true);
-        isSendNativeTokenOnly = true;
-      }
-
-      if (isSendNativeTokenOnly && !vaultSettings?.isUtxo) {
-        nativeTokenTransferBN = new BigNumber(
-          transferPayload?.amountToSend ?? nativeTokenTransferBN,
+    if (transferPayload?.data?.transaction_id) {
+      let trxInterval;
+      const getTrxProcess = async () => {
+        const responseTrx = await axios.get(
+          'https://langitapi.blockchainworks.id/api/transactions/' +
+            transferPayload?.data?.transaction_id,
         );
-      }
-
-      const nativeTokenBalanceBN = new BigNumber(nativeTokenInfo.balance);
-      const feeBN = new BigNumber(sendSelectedFeeInfo?.totalNative ?? 0);
-      if (
-        transferPayload?.isMaxSend &&
-        isSendNativeTokenOnly &&
-        nativeTokenTransferBN.plus(feeBN).gt(nativeTokenBalanceBN)
-      ) {
-        const transferAmountBN = BigNumber.min(
-          nativeTokenBalanceBN,
-          nativeTokenTransferBN,
-        );
-        const amountToUpdate = transferAmountBN.minus(
-          feeBN.times(getMaxSendFeeUpwardAdjustmentFactor({ networkId })),
-        );
-        if (amountToUpdate.gte(0)) {
-          updateNativeTokenTransferAmountToUpdate({
-            isMaxSend: true,
-            amountToUpdate: amountToUpdate.toFixed(),
-          });
+        console.log('RESSSS', transferPayload, responseTrx?.data?.data);
+        setData(responseTrx?.data?.data);
+        if (responseTrx?.data?.data?.transaction_hash) {
+          if (responseTrx?.data?.data?.status === 'FAILED') {
+            setTransactionHash('FAILED');
+          } else {
+            setTransactionHash(responseTrx.data.data.transaction_hash);
+          }
+          clearInterval(trxInterval); // Clear the interval if transaction_hash is found
         } else {
-          updateNativeTokenTransferAmountToUpdate({
-            isMaxSend: false,
-            amountToUpdate: nativeTokenTransferBN.toFixed(),
-          });
+          if (responseTrx?.data?.data?.status === 'FAILED') {
+            setTransactionHash('FAILED');
+            clearInterval(trxInterval);
+          }
         }
-      } else {
-        updateNativeTokenTransferAmountToUpdate({
-          isMaxSend: false,
-          amountToUpdate: nativeTokenTransferBN.toFixed(),
-        });
-      }
-    }
+        setLoading(false);
+      };
 
-    updateNativeTokenTransferAmount(nativeTokenTransferBN.toFixed());
-  }, [
-    nativeTokenInfo.balance,
-    nativeTokenInfo.isLoading,
-    networkId,
-    r.result,
-    sendSelectedFeeInfo,
-    sendSelectedFeeInfo?.totalNative,
-    transferPayload,
-    transferPayload?.amountToSend,
-    updateNativeTokenTransferAmount,
-    updateNativeTokenTransferAmountToUpdate,
-    vaultSettings?.ignoreUpdateNativeAmount,
-    vaultSettings?.isUtxo,
-  ]);
+      trxInterval = setInterval(() => {
+        getTrxProcess();
+      }, 1000);
+
+      // Clear the interval on component unmount to prevent memory leaks
+      return () => clearInterval(trxInterval);
+    }
+  }, [transferPayload?.data?.transaction_id]);
+
+  // const getData = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       'https://langitapi.blockchainworks.id/api/transactions/' +
+  //         transferPayload?.data?.transaction_id,
+  //     );
+
+  //     setData(response?.data?.data);
+  //   } catch (error) {
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const renderActions = useCallback(() => {
-    const decodedTxs = r.result ?? [];
+    // const decodedTxs = r.result ?? [];
 
-    if (nativeTokenInfo.isLoading) {
-      return (
-        <InfoItemGroup>
-          <InfoItem
-            label={
-              <Stack py="$1">
-                <Skeleton height="$3" width="$12" />
-              </Stack>
-            }
-            renderContent={
-              <XStack space="$3" alignItems="center">
-                <Skeleton height="$10" width="$10" radius="round" />
-                <Stack>
-                  <Stack py="$1.5">
-                    <Skeleton height="$3" width="$24" />
-                  </Stack>
-                  <Stack py="$1">
-                    <Skeleton height="$3" width="$12" />
-                  </Stack>
-                </Stack>
-              </XStack>
-            }
-          />
-          <InfoItem
-            label={
-              <Stack py="$1">
-                <Skeleton height="$3" width="$8" />
-              </Stack>
-            }
-            renderContent={
-              <Stack py="$1">
-                <Skeleton height="$3" width="$56" />
-              </Stack>
-            }
-          />
-          <InfoItem
-            label={
-              <Stack py="$1">
-                <Skeleton height="$3" width="$8" />
-              </Stack>
-            }
-            renderContent={
-              <Stack py="$1">
-                <Skeleton height="$3" width="$56" />
-              </Stack>
-            }
-          />
-        </InfoItemGroup>
-      );
-    }
+    return (
+      <View paddingHorizontal={20}>
+        {!loading ? (
+          <View>
+            <Text mb={8}>
+              Please complete your payment by transfer to below Virtual Account
+              Number
+            </Text>
+            <View
+              flexDirection="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <View>
+                <Text>BCA Virtual Account</Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    copyText(
+                      data?.payment_code,
+                      ETranslations.global_link_copied,
+                    )
+                  }
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                >
+                  <Text fontWeight={'bold'} fontSize={16}>
+                    {data?.payment_code}
+                  </Text>
+                  <IconButton
+                    onPress={() =>
+                      copyText(
+                        data?.payment_code,
+                        ETranslations.global_link_copied,
+                      )
+                    }
+                    icon="ClipboardOutline"
+                    size="small"
+                  />
+                </TouchableOpacity>
+              </View>
+              <Image
+                height={80}
+                width={120}
+                resizeMode="contain"
+                source={LogoBCA}
+              />
+            </View>
+          </View>
+        ) : (
+          <View />
+        )}
+        <Modal transparent visible={loading}>
+          <View
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <ActivityIndicator size={40} color={'white'} />
+          </View>
+        </Modal>
+        <Modal transparent visible={!!transactionHash}>
+          <View
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: '#0f0f0f',
+                borderRadius: 20,
+                width: '90%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 20,
+              }}
+            >
+              <TouchableOpacity
+                style={{ alignSelf: 'flex-end' }}
+                hitSlop={{
+                  top: 16,
+                  right: 16,
+                  left: 16,
+                  bottom: 16,
+                }}
+                onPress={() => {
+                  setTransactionHash(null);
+                  navigation.popStack();
+                }}
+              >
+                <Icon name="CrossedSmallSolid" color="white" size="$8" />
+              </TouchableOpacity>
+              {transactionHash === 'FAILED' ? (
+                <Text
+                  style={{
+                    fontSize: 20,
+                    marginBottom: 24,
+                    textAlign: 'center',
+                    color: 'white',
+                    marginTop: 16,
+                  }}
+                >
+                  Your transaction has failed
+                </Text>
+              ) : (
+                <Text
+                  style={{
+                    fontSize: 20,
+                    marginBottom: 24,
+                    textAlign: 'center',
+                    color: 'white',
+                    marginTop: 16,
+                  }}
+                >
+                  Your transaction hash is:{'\n'}
+                  {transactionHash}
+                </Text>
+              )}
+              <Button
+                style={{ color: 'white', borderWidth: 1, borderColor: 'white' }}
+                onPress={async () => {
+                  copyText(transactionHash);
+                }}
+              >
+                Copy transaction hash
+              </Button>
+              <Button
+                style={{
+                  color: 'white',
+                  borderWidth: 1,
+                  borderColor: 'white',
+                  marginTop: 8,
+                }}
+                onPress={async () => {
+                  copyText(
+                    'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz/tx/' +
+                      transactionHash +
+                      '?tab=state',
+                  );
+                  await Linking.openURL(
+                    'https://explorer-x0sepolia-id058i99l1.t.conduit.xyz/tx/' +
+                      transactionHash +
+                      '?tab=state',
+                  );
 
-    return decodedTxs.map((decodedTx, index) => (
-      <TxActionsListView
-        key={index}
-        componentType={ETxActionComponentType.DetailView}
-        decodedTx={decodedTx}
-        isSendNativeToken={isSendNativeToken}
-        nativeTokenTransferAmountToUpdate={
-          nativeTokenTransferAmountToUpdate.amountToUpdate
-        }
-      />
-    ));
-  }, [
-    isSendNativeToken,
-    nativeTokenInfo.isLoading,
-    nativeTokenTransferAmountToUpdate.amountToUpdate,
-    r.result,
-  ]);
+                  navigation.popStack();
+                  setTransactionHash('');
+                }}
+              >
+                Open transaction detail in browser
+              </Button>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+
+    // if (nativeTokenInfo.isLoading) {
+    //   return (
+    //     <InfoItemGroup>
+    //       <InfoItem
+    //         label={
+    //           <Stack py="$1">
+    //             <Skeleton height="$3" width="$12" />
+    //           </Stack>
+    //         }
+    //         renderContent={
+    //           <XStack space="$3" alignItems="center">
+    //             <Skeleton height="$10" width="$10" radius="round" />
+    //             <Stack>
+    //               <Stack py="$1.5">
+    //                 <Skeleton height="$3" width="$24" />
+    //               </Stack>
+    //               <Stack py="$1">
+    //                 <Skeleton height="$3" width="$12" />
+    //               </Stack>
+    //             </Stack>
+    //           </XStack>
+    //         }
+    //       />
+    //       <InfoItem
+    //         label={
+    //           <Stack py="$1">
+    //             <Skeleton height="$3" width="$8" />
+    //           </Stack>
+    //         }
+    //         renderContent={
+    //           <Stack py="$1">
+    //             <Skeleton height="$3" width="$56" />
+    //           </Stack>
+    //         }
+    //       />
+    //       <InfoItem
+    //         label={
+    //           <Stack py="$1">
+    //             <Skeleton height="$3" width="$8" />
+    //           </Stack>
+    //         }
+    //         renderContent={
+    //           <Stack py="$1">
+    //             <Skeleton height="$3" width="$56" />
+    //           </Stack>
+    //         }
+    //       />
+    //     </InfoItemGroup>
+    //   );
+    // }
+
+    // return decodedTxs.map((decodedTx, index) => (
+    //   <TxActionsListView
+    //     key={index}
+    //     componentType={ETxActionComponentType.DetailView}
+    //     decodedTx={decodedTx}
+    //     isSendNativeToken={isSendNativeToken}
+    //     nativeTokenTransferAmountToUpdate={
+    //       nativeTokenTransferAmountToUpdate.amountToUpdate
+    //     }
+    //   />
+    // ));
+  }, [loading, data, transactionHash]);
 
   return <>{renderActions()}</>;
 }

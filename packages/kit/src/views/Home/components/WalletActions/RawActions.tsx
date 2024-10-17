@@ -117,7 +117,7 @@ function ActionSwap(props: IActionItemsProps) {
   const intl = useIntl();
   return (
     <ActionItem
-      label={"Buy"}
+      label={"Buy\nCrypto"}
       icon="SwitchHorOutline"
       {...props}
     />

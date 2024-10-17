@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useIntl } from 'react-intl';
 
@@ -51,8 +51,11 @@ import { useAtom, useSetAtom } from 'jotai';
 import { activeAccountsAtom } from '../../../states/jotai/contexts/accountSelector';
 import { myAccountAtom } from '../../../states/jotai/myAccountAtom';
 import axios from 'axios';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, PermissionsAndroid } from 'react-native';
 import { getPasswordKeyboardType } from '../../../components/Password/utils';
+import * as Keychain from 'react-native-keychain';
+import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store';
+import RNFS from '@onekeyhq/shared/src/modules3rdParty/react-native-fs/index.native';
 
 type IActionsGroupItem = {
   iconName: IKeyOfIcons;
@@ -63,6 +66,43 @@ type IActionsGroupItem = {
 
 type IActionsProp = {
   items: IActionsGroupItem[];
+};
+
+const getPermission = async () => {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: 'Cool Photo App Camera Permission',
+        message: 'Your app needs permission.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    console.log('GRANTEDD', granted);
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    }
+    console.log('Camera permission denied');
+    return false;
+  } catch (err) {
+    console.warn(err);
+    return false;
+  }
+};
+
+const saveData = async (data) => {
+  const path = `${RNFS.ExternalStorageDirectoryPath}/my-x0.txt`;
+
+  if (await getPermission()) {
+    try {
+      await RNFS.writeFile(path, JSON.stringify(data), 'utf8');
+      console.log('SUCCESS WRITE');
+    } catch (e) {
+      console.log('ERROR SAVE', e);
+    }
+  }
 };
 
 function ActionsGroup({ items }: IActionsProp) {
@@ -184,7 +224,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
 
       console.log('REEE', responseAccount?.data);
       if (response?.status === 200) {
-        setMyAccount({
+        const resData = {
           accountName: userInfo?.user?.name || '',
           email: userInfo?.user?.email,
           imageUrl: userInfo?.user?.photo || '',
@@ -195,7 +235,10 @@ function RecoveryInput({ userInfo, onClose }: any) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           ...response?.data?.data,
           ...responseAccount?.data?.data,
-        });
+        };
+        setMyAccount(resData);
+        // await Keychain.setGenericPassword('my-x0', JSON.stringify(resData));
+        await saveData(resData);
         // // await GoogleSignin.signOut();
         // // await GoogleSignin.revokeAccess();
         onClose();
@@ -207,7 +250,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
       }
     } catch (error) {
       // @ts-ignore
-      console.log(error?.response);
+      console.log('ERROR SUBMIT', error?.response);
       Toast.message({ message: 'Wrong key' });
     } finally {
       setLoading(false);
@@ -297,7 +340,31 @@ export function GetStarted({
   const { showCloseButton } = route.params || {};
   const [myAccount, setMyAccount] = useAtom(myAccountAtom);
   const [isLoading, setLoading] = useState(false);
-  console.log("MY ACCC", myAccount)
+  console.log('MY ACCC', myAccount);
+
+  useEffect(() => {
+    // yo();
+    // async () => {
+    //   await getPermission();
+    // };
+  }, []);
+
+  const yo = async () => {
+    alert('a');
+    try {
+      // Retrieve the credentials
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        console.log(
+          'Credentials successfully loaded for user ' + credentials.password,
+        );
+      } else {
+        console.log('No credentials stored');
+      }
+    } catch (error) {
+      console.error('Failed to access Keychain', error);
+    }
+  };
 
   const handleCreateWalletPress = async () => {
     // await backgroundApiProxy.servicePassword.promptPasswordVerify();
@@ -345,7 +412,7 @@ export function GetStarted({
       );
 
       if (response?.status === 200) {
-        setMyAccount({
+        const resData = {
           accountName: userInfo?.data?.user?.name || '',
           email: userInfo?.data?.user?.email,
           imageUrl: userInfo?.data?.user?.photo || '',
@@ -364,9 +431,14 @@ export function GetStarted({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           ...response?.data?.data,
           ...responseAccount?.data?.data,
-        });
-        // await GoogleSignin.signOut();
-        // await GoogleSignin.revokeAccess();
+        };
+        setMyAccount(resData);
+        // const credential = await localDb.getCredential(walletId);
+
+        // await Keychain.setGenericPassword('my-x0', JSON.stringify(resData));
+
+        await saveData(resData);
+        // await GoogleSignin.signOut();        // await GoogleSignin.revokeAccess();
         navigation.navigate(ERootRoutes.Main);
       } else {
         await GoogleSignin.signOut();

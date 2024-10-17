@@ -3,7 +3,14 @@ import { memo, useCallback, useEffect } from 'react';
 import { useRoute } from '@react-navigation/core';
 import { useIntl } from 'react-intl';
 
-import { Alert, Page, Stack } from '@onekeyhq/components';
+import {
+  Alert,
+  Button,
+  Page,
+  Stack,
+  useSafeKeyboardAnimationStyle,
+  View,
+} from '@onekeyhq/components';
 import backgroundApiProxy from '@onekeyhq/kit/src/background/instance/backgroundApiProxy';
 import useDappApproveAction from '@onekeyhq/kit/src/hooks/useDappApproveAction';
 import { usePromiseResult } from '@onekeyhq/kit/src/hooks/usePromiseResult';
@@ -34,6 +41,7 @@ import { TxSourceInfoContainer } from './TxSourceInfoContainer';
 import { TxSwapInfoContainer } from './TxSwapInfoContainer';
 
 import type { RouteProp } from '@react-navigation/core';
+import Animated from 'react-native-reanimated';
 
 function SendConfirmContainer() {
   const intl = useIntl();
@@ -61,65 +69,67 @@ function SendConfirmContainer() {
     closeWindowAfterResolved: true,
   });
 
-  useEffect(() => {
-    appEventBus.emit(EAppEventBusNames.SendConfirmContainerMounted, undefined);
-  }, []);
+  const safeKeyboardAnimationStyle = useSafeKeyboardAnimationStyle();
 
-  const { network } =
-    usePromiseResult(async () => {
-      updateUnsignedTxs(unsignedTxs);
-      updateNativeTokenInfo({
-        isLoading: true,
-        balance: '0',
-        logoURI: '',
-      });
-      const [n, nativeTokenAddress] = await Promise.all([
-        backgroundApiProxy.serviceNetwork.getNetwork({ networkId }),
-        backgroundApiProxy.serviceToken.getNativeTokenAddress({ networkId }),
-      ]);
-      const checkInscriptionProtectionEnabled =
-        await backgroundApiProxy.serviceSetting.checkInscriptionProtectionEnabled(
-          {
-            networkId,
-            accountId,
-          },
-        );
-      const withCheckInscription =
-        checkInscriptionProtectionEnabled && settings.inscriptionProtection;
-      const r = await backgroundApiProxy.serviceToken.fetchTokensDetails({
-        networkId,
-        accountId,
-        contractList: [nativeTokenAddress],
-        withFrozenBalance: true,
-        withCheckInscription,
-      });
-      const balance = r[0].balanceParsed;
-      updateNativeTokenInfo({
-        isLoading: false,
-        balance,
-        logoURI: r[0].info.logoURI ?? '',
-      });
-      return { network: n };
-    }, [
-      accountId,
-      networkId,
-      unsignedTxs,
-      updateNativeTokenInfo,
-      updateUnsignedTxs,
-      settings.inscriptionProtection,
-    ]).result ?? {};
+  // useEffect(() => {
+  //   appEventBus.emit(EAppEventBusNames.SendConfirmContainerMounted, undefined);
+  // }, []);
 
-  useEffect(
-    () => () =>
-      updateSendFeeStatus({ status: ESendFeeStatus.Idle, errMessage: '' }),
-    [updateSendFeeStatus],
-  );
+  // const { network } =
+  //   usePromiseResult(async () => {
+  //     updateUnsignedTxs(unsignedTxs);
+  //     updateNativeTokenInfo({
+  //       isLoading: true,
+  //       balance: '0',
+  //       logoURI: '',
+  //     });
+  //     const [n, nativeTokenAddress] = await Promise.all([
+  //       backgroundApiProxy.serviceNetwork.getNetwork({ networkId }),
+  //       backgroundApiProxy.serviceToken.getNativeTokenAddress({ networkId }),
+  //     ]);
+  //     const checkInscriptionProtectionEnabled =
+  //       await backgroundApiProxy.serviceSetting.checkInscriptionProtectionEnabled(
+  //         {
+  //           networkId,
+  //           accountId,
+  //         },
+  //       );
+  //     const withCheckInscription =
+  //       checkInscriptionProtectionEnabled && settings.inscriptionProtection;
+  //     const r = await backgroundApiProxy.serviceToken.fetchTokensDetails({
+  //       networkId,
+  //       accountId,
+  //       contractList: [nativeTokenAddress],
+  //       withFrozenBalance: true,
+  //       withCheckInscription,
+  //     });
+  //     const balance = r[0].balanceParsed;
+  //     updateNativeTokenInfo({
+  //       isLoading: false,
+  //       balance,
+  //       logoURI: r[0].info.logoURI ?? '',
+  //     });
+  //     return { network: n };
+  //   }, [
+  //     accountId,
+  //     networkId,
+  //     unsignedTxs,
+  //     updateNativeTokenInfo,
+  //     updateUnsignedTxs,
+  //     settings.inscriptionProtection,
+  //   ]).result ?? {};
+
+  // useEffect(
+  //   () => () =>
+  //     updateSendFeeStatus({ status: ESendFeeStatus.Idle, errMessage: '' }),
+  //   [updateSendFeeStatus],
+  // );
 
   const renderSendConfirmView = useCallback(
     () => (
       <>
-        <Page.Body testID="tx-confirmation-body">
-          <Stack>
+        <Page.Body flex={1} testID="tx-confirmation-body">
+          {/* <Stack>
             {sendFeeStatus.errMessage ? (
               <Alert
                 fullBleed
@@ -143,22 +153,22 @@ function SendConfirmContainer() {
                 )}
               />
             ) : null}
-          </Stack>
+          </Stack> */}
           <TxSourceInfoContainer sourceInfo={sourceInfo} />
           <TxActionsContainer
             accountId={accountId}
             networkId={networkId}
             transferPayload={transferPayload}
           />
-          <TxFeeContainer
+          {/* <TxFeeContainer
             accountId={accountId}
             networkId={networkId}
             useFeeInTx={useFeeInTx}
-          />
+          /> */}
           {/* <TxSwapInfoContainer /> */}
-          <TxSimulationContainer />
+          {/* <TxSimulationContainer /> */}
         </Page.Body>
-        <SendConfirmActionsContainer
+        {/* <SendConfirmActionsContainer
           sourceInfo={sourceInfo}
           signOnly={signOnly}
           accountId={accountId}
@@ -166,14 +176,14 @@ function SendConfirmContainer() {
           onSuccess={onSuccess}
           onFail={onFail}
           onCancel={onCancel}
-        />
+        /> */}
       </>
     ),
     [
       sendFeeStatus.errMessage,
       sendAlertStatus.isInsufficientNativeBalance,
       intl,
-      network?.symbol,
+      // network?.symbol,
       sourceInfo,
       accountId,
       networkId,

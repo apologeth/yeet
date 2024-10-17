@@ -5897,12 +5897,14 @@ __metadata:
     react-native-cloud-fs: "npm:@onekeyfe/react-native-cloud-fs@2.6.1"
     react-native-crypto: "npm:^2.2.0"
     react-native-device-info: "npm:10.11.0"
+    react-native-encrypted-storage: "npm:4.0.3"
     react-native-fast-image: "npm:8.6.3"
     react-native-file-logger: "npm:^0.4.1"
     react-native-fs: "npm:^2.20.0"
     react-native-gesture-handler: "npm:2.14.1"
     react-native-get-random-values: "npm:1.9.0"
     react-native-keyboard-manager: "npm:^6.5.11-1"
+    react-native-keychain: "npm:9.0.0"
     react-native-level-fs: "npm:^3.0.1"
     react-native-metrix: "npm:^0.6.3"
     react-native-mmkv: "npm:2.12.2"
@@ -5913,6 +5915,7 @@ __metadata:
     react-native-restart: "npm:0.0.27"
     react-native-safe-area-context: "npm:4.7.2"
     react-native-screens: "npm:3.28.0"
+    react-native-secure-key-store: "npm:2.0.10"
     react-native-share: "npm:^9.4.1"
     react-native-spotlight-tour: "npm:^3.0.1"
     react-native-svg: "npm:^13.9.0"
@@ -27829,6 +27832,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-encrypted-storage@npm:4.0.3":
+  version: 4.0.3
+  resolution: "react-native-encrypted-storage@npm:4.0.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/04b1db35c797c929a42f1bcf12d004042f324f415b9d24e195cbd08e8c5cc160728fae8bd4787e111befe5afef189253cbadd1a4b5e56f006c7c3acb3ee41142
+  languageName: node
+  linkType: hard
+
 "react-native-fast-image@npm:8.6.3":
   version: 8.6.3
   resolution: "react-native-fast-image@npm:8.6.3"
@@ -27938,6 +27951,13 @@ __metadata:
   peerDependencies:
     react-native: ">=0.60"
   checksum: 10/c91e36461c089743cd06915028fa516978048093edabd80b01b047d9cddc021f7421f957fb916ad63b03f3367ea0dffce0e65c082ae8d56d27a7cc73440d3c7b
+  languageName: node
+  linkType: hard
+
+"react-native-keychain@npm:9.0.0":
+  version: 9.0.0
+  resolution: "react-native-keychain@npm:9.0.0"
+  checksum: 10/17110e12f8ece92462789d0756997a9dd20ef24f7e57f424cc5c08c23a0d83ce201afdb243d5f89de59c6f426abb4089c48617dcad5be0632462e4958e0403d1
   languageName: node
   linkType: hard
 
@@ -28137,6 +28157,13 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/8694490e83106a2b5cf1206f6bcbef0112abef0a825dc1e68a5c6bd5295d9d1f5f17e3904d53f3a276d436864e9355ca7fc63cd205a6fcbb5453611f0c7f9f1d
+  languageName: node
+  linkType: hard
+
+"react-native-secure-key-store@npm:2.0.10":
+  version: 2.0.10
+  resolution: "react-native-secure-key-store@npm:2.0.10"
+  checksum: 10/63c7d23928d9b309d8c440b5bcf026502668d1036d194e9ed77c08e215e67dc5b1312e64f7debb2cf3b0d93dacaa7c0289eeaa3d224a7c90214d959d87398fdc
   languageName: node
   linkType: hard
 

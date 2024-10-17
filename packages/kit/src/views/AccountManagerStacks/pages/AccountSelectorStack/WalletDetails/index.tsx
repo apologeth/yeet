@@ -612,129 +612,15 @@ export function WalletDetails({ num }: IWalletDetailsProps) {
                   // }
                   // navigation.popStack();
                   // item?.address
-                   openChainSelector({
+                  openChainSelector({
                     title: 'Source Network',
                     networkIds: selectorNetworks.map((o) => o.id),
                     defaultNetworkId: current?.id,
                     address: item?.address,
                     notBack: true,
-                    onSelect: async (networkParam) => {
-                      let r = {};
-                      setLoading(true);
-
-                      if (networkParam?.chainId !== '170845') {
-                        try {
-                          const blockedTokens =
-                            await backgroundApiProxy.serviceToken.getBlockedTokens(
-                              {
-                                networkId: networkParam?.id,
-                              },
-                            );
-
-                          r =
-                            await backgroundApiProxy.serviceToken.fetchAccountTokens(
-                              {
-                                mergeTokens: true,
-                                networkId: networkParam?.id,
-                                accountAddress: item?.address,
-                                flag: 'home-token-list',
-                                // xpub: await backgroundApiProxy.serviceAccount.getAccountXpub({
-                                //   accountId: account.id,
-                                //   networkId: network.id,
-                                // }),
-                                blockedTokens: Object.keys(blockedTokens),
-                              },
-                            );
-                        } catch (error) {
-                        } finally {
-                          setLoading(false);
-                        }
-                      } else {
-                        try {
-                          const provider = new ethers.providers.JsonRpcProvider(
-                            'https://rpc-x0sepolia-id058i99l1.t.conduit.xyz/',
-                          );
-                          const balance = await provider.getBalance(
-                            item?.address,
-                          );
-                          const stringBalance =
-                            ethers.utils.formatEther(balance);
-
-                          const responseTokens = await axios.get(
-                            'https://langitapi.blockchainworks.id/api/tokens/',
-                          );
-                          const langitTokens: any[] = await Promise.all(
-                            responseTokens?.data?.data?.map(async (val) => {
-                              const balance = await getSTKBalance(
-                                val?.address,
-                                item?.address,
-                              );
-                              return {
-                                ...val,
-                                '$key': `evm-170845_0x42e19b59fa5632c01b87666a400a002a695251d2_${val?.address}`,
-                                'logoURI':
-                                  'https://uni.onekey-asset.com/static/chain/eth.png',
-                                balance: balance,
-                              };
-                            }),
-                          );
-
-                          const tokens = [
-                            {
-                              '$key':
-                                'evm--170845_0x42e19b59fa5632c01b87666a400a002a695251d2_0x0000000000000000000000000000000000000000',
-                              'address':
-                                '0x0000000000000000000000000000000000000000',
-                              'decimals': 6,
-                              'isNative': false,
-                              'logoURI':
-                                'https://uni.onekey-asset.com/static/chain/eth.png',
-                              'name': 'x0',
-                              'riskLevel': 1,
-                              'symbol': 'x0',
-                              'totalSupply': '',
-                            },
-                            ...langitTokens,
-                          ];
-
-                          const response = await axios.get(
-                            'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
-                              1,
-                          );
-                          const tokenMap = tokens?.reduce((acc, token) => {
-                            // Create an entry in the accumulator object for each token
-
-                            acc[token['$key']] = {
-                              price: '0.0', // Default price, update with real value if available
-                              price24h: '0', // Default 24h price change, update if available
-                              balance: '0', // Default balance, update with real value if available
-                              balanceParsed: token['$key']?.includes(
-                                '0x0000000000000000000000000000000000000000',
-                              )
-                                ? stringBalance
-                                : token?.balance, // Default parsed balance, replace with the correct variable
-                              fiatValue: token['$key']?.includes(
-                                '0x0000000000000000000000000000000000000000',
-                              )
-                                ? Number(stringBalance) *
-                                  Number(response?.data?.data?.price)
-                                : Number(token?.balance) *
-                                  Number(response?.data?.data?.price), // Default fiat value, update with real value if available
-                              address: token?.address,
-                            };
-
-                            return acc; // Return the updated accumulator object
-                          }, {});
-                          r = {
-                            data: tokens,
-                            map: tokenMap,
-                            keys: networkParam?.chainId,
-                          };
-                        } catch (error) {
-                        } finally {
-                          setLoading(false);
-                        }
-                      }
+                    onSelect: async (tokenParam, networkParam) => {
+                      // console.log(tokenItem, network);
+                      // let r = {};
 
                       navigation.pushModal(EModalRoutes.SendModal, {
                         screen: EModalSendRoutes.SendDataInput,
@@ -743,8 +629,7 @@ export function WalletDetails({ num }: IWalletDetailsProps) {
                           networkId: networkParam?.id,
                           isNFT: false,
                           isSourceAccount: true,
-                          sourceTokens:
-                            networkParam?.chainId === '170845' ? r : r?.tokens,
+                          sourceToken: tokenParam,
                         },
                       });
                     },

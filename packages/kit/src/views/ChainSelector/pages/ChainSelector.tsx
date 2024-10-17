@@ -50,8 +50,8 @@ export default function ChainSelectorPage({
       networkId={defaultNetworkId}
       networks={result ?? []}
       address={address}
-      onPressItem={(network) => {
-        onSelect?.(network);
+      onPressItem={(token, network) => {
+        onSelect?.(token, network);
         if (!notBack) {
           navigation.goBack();
         }

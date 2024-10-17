@@ -42,7 +42,7 @@ import { useSettingsPersistAtom } from '@onekeyhq/kit-bg/src/states/jotai/atoms'
 import type { ITransferInfo } from '@onekeyhq/kit-bg/src/vaults/types';
 import { OneKeyError, OneKeyInternalError } from '@onekeyhq/shared/src/errors';
 import { ETranslations } from '@onekeyhq/shared/src/locale';
-import type {
+import {
   EModalSendRoutes,
   IModalSendParamList,
 } from '@onekeyhq/shared/src/routes';
@@ -90,8 +90,9 @@ function SendDataInputContainer() {
     amount: sendAmount = '',
     type,
     isSourceAccount,
-    sourceTokens,
-  } = route.params;
+    sourceToken,
+    isBuy,
+  } = route?.params;
 
   const [isUseFiat, setIsUseFiat] = useState(type === 'fiat');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,7 +114,7 @@ function SendDataInputContainer() {
   const nft = nfts?.[0];
   const [myAccount] = useAtom(myAccountAtom);
 
-  const [tokenInfo, setTokenInfo] = useState(token);
+  const [tokenInfo, setTokenInfo] = useState(token || sourceToken);
   const { account, network } = useAccountData({ accountId, networkId });
   const sendConfirm = useSendConfirm({
     accountId: myAccount?.address,
@@ -134,12 +135,12 @@ function SendDataInputContainer() {
   const activeToken = useMemo(() => {
     if (tokenInfo) {
       if (isSourceAccount) {
-        return sourceTokens?.map[tokenInfo['$key']];
+        return sourceToken;
       }
       return map[tokenInfo['$key']];
     }
     return '';
-  }, [tokenInfo, sourceTokens, isSourceAccount]);
+  }, [tokenInfo, sourceToken, isSourceAccount]);
 
   const {
     result: [
@@ -327,32 +328,29 @@ function SendDataInputContainer() {
   }, [form, linkedAmount]);
   const handleOnSelectToken = useCallback(() => {
     if (isSelectTokenDisabled) return;
-    navigation.pushModal(EModalRoutes.AssetSelectorModal, {
-      screen: EAssetSelectorRoutes.TokenSelector,
-      params: {
-        networkId,
-        accountId,
-        tokens: {
-          data:
-            isSourceAccount && sourceTokens
-              ? sourceTokens?.data
-              : allTokens.tokens,
-          keys:
-            isSourceAccount && sourceTokens
-              ? sourceTokens?.keys
-              : allTokens.keys,
-          map: isSourceAccount && sourceTokens ? sourceTokens?.map : map,
+    if (!isSourceAccount) {
+      navigation.pushModal(EModalRoutes.AssetSelectorModal, {
+        screen: EAssetSelectorRoutes.TokenSelector,
+        params: {
+          networkId,
+          accountId,
+          tokens: {
+            data: allTokens.tokens,
+            keys: allTokens.keys,
+            map: map,
+          },
+          onSelect: (data: IToken) => {
+            setTokenInfo(data);
+          },
         },
-        onSelect: (data: IToken) => {
-          setTokenInfo(data);
-        },
-      },
-    });
+      });
+    } else {
+    }
   }, [
     accountId,
     allTokens.keys,
     allTokens.tokens,
-    sourceTokens,
+    sourceToken,
     isSourceAccount,
     isSelectTokenDisabled,
     map,
@@ -402,12 +400,12 @@ function SendDataInputContainer() {
         return;
       }
       const toAddress = form.getValues('to').resolved;
-      if (!toAddress) return;
+      if (!isBuy && !toAddress) return;
       const realAmount = amount;
       setIsSubmitting(true);
 
       let responseFiat;
-      if (isUseFiat) {
+      if (isUseFiat || isBuy) {
         responseFiat = await axios.get(
           'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
             realAmount,
@@ -417,23 +415,31 @@ function SendDataInputContainer() {
       try {
         const payload = {
           'sender_address': myAccount?.account_abstraction_address,
-          'receiver_address': toAddress,
-          'sent_amount': isUseFiat
+          'receiver_address': isBuy ? myAccount?.email : toAddress,
+          'sent_amount':
+            isUseFiat && !isBuy
+              ? responseFiat?.data?.data?.token_amount
+              : realAmount,
+          'received_amount': isBuy
             ? responseFiat?.data?.data?.token_amount
-            : realAmount,
-          'received_amount': isUseFiat ? Number(realAmount) : null,
+            : isUseFiat
+            ? Number(realAmount)
+            : null,
           'sent_token_address':
             activeToken?.address ===
             '0x0000000000000000000000000000000000000000'
               ? null
               : activeToken?.address,
-          'received_token_address':
-            activeToken?.address ===
-            '0x0000000000000000000000000000000000000000'
-              ? null
-              : activeToken?.address,
+          'received_token_address': isBuy
+            ? '0x4a69f6F98EB7f7e66188F593F96ff905441Ae0D3'
+            : activeToken?.address ===
+              '0x0000000000000000000000000000000000000000'
+            ? null
+            : activeToken?.address,
           'shard_device': myAccount?.shard_device,
-          transfer_type: isUseFiat
+          transfer_type: isBuy
+            ? null
+            : isUseFiat
             ? activeToken?.address ===
               '0x0000000000000000000000000000000000000000'
               ? 'NATIVE_TO_FIAT'
@@ -442,30 +448,47 @@ function SendDataInputContainer() {
               '0x0000000000000000000000000000000000000000'
             ? 'NATIVE_TO_NATIVE'
             : 'CRYPTO_TO_CRYPTO',
-          type: 'TRANSFER',
+          type: isBuy ? 'BUY_TOKEN' : 'TRANSFER',
         };
-
-        console.log('PAYLOAD', payload);
+        console.log('PAYLOADDD', payload);
 
         const response = await axios.post(
           'https://langitapi.blockchainworks.id/api/transactions',
           payload,
         );
-        setTransactionId(response?.data?.data?.transaction_id);
         console.log('SUCCESS SEND', response?.data);
+        if (isBuy) {
+          navigation.push(EModalSendRoutes.SendConfirm, {
+            accountId,
+            networkId,
+            unsignedTxs: [],
+            // onSuccess,
+            // onFail,
+            // onCancel,
+            transferPayload: {
+              amountToSend: realAmount,
+              isMaxSend,
+              data: response?.data?.data,
+            },
+          });
+          setIsSubmitting(false);
+        } else {
+          setTransactionId(response?.data?.data?.transaction_id);
+        }
       } catch (error) {
         console.error('ERROIR SEND', error?.response?.data);
         setIsSubmitting(false);
       }
 
       // await sendConfirm.navigationToSendConfirm({
-      //   transfersInfo,
+      //   // transfersInfo,
       //   sameModal: true,
       //   transferPayload: {
       //     amountToSend: realAmount,
       //     isMaxSend,
       //   },
       // });
+
       // setIsSubmitting(false);
     } catch (e: any) {
       setIsSubmitting(false);
@@ -542,7 +565,8 @@ function SendDataInputContainer() {
 
       let isInsufficientBalance = false;
       let isLessThanMinTransferAmount = false;
-      if (isUseFiat) {
+      if (isBuy) {
+      } else if (isUseFiat) {
         if (amountBN.isGreaterThan(maxFiatPrice * Number(maxAmount))) {
           isInsufficientBalance = true;
         }
@@ -694,37 +718,45 @@ function SendDataInputContainer() {
 
         <AmountInput
           reversible
-          enableMaxAmount
-          balanceProps={{
-            loading: isLoadingAssets,
-            value: isUseFiat
-              ? `Rp ${Math.floor(maxFiatPrice * maxAmount * 100) / 100}`
-              : maxAmount,
-            onPress: async () => {
-              if (isUseFiat) {
-                setLoadingFiat(true);
-                try {
-                  form.setValue(
-                    'amount',
-                    String(Math.floor(maxFiatPrice * maxAmount * 100) / 100),
-                  );
-                } catch (error) {
-                } finally {
-                  setLoadingFiat(false);
+          enableMaxAmount={!isBuy}
+          balanceProps={
+            isBuy
+              ? null
+              : {
+                  loading: isLoadingAssets,
+                  value: isUseFiat
+                    ? `Rp ${Math.floor(maxFiatPrice * maxAmount * 100) / 100}`
+                    : maxAmount,
+                  onPress: async () => {
+                    if (isUseFiat) {
+                      setLoadingFiat(true);
+                      try {
+                        form.setValue(
+                          'amount',
+                          String(
+                            Math.floor(maxFiatPrice * maxAmount * 100) / 100,
+                          ),
+                        );
+                      } catch (error) {
+                      } finally {
+                        setLoadingFiat(false);
+                      }
+                    } else {
+                      form.setValue('amount', maxAmount);
+                    }
+                    void form.trigger('amount');
+                    setIsMaxSend(true);
+                  },
                 }
-              } else {
-                form.setValue('amount', maxAmount);
-              }
-              void form.trigger('amount');
-              setIsMaxSend(true);
-            },
-          }}
-          valueProps={{
-            value: isUseFiat
-              ? `${linkedAmount.amount} ${tokenSymbol}`
-              : `${currencySymbol}${linkedAmount.amount}`,
-            onPress: handleOnChangeAmountMode,
-          }}
+          }
+          valueProps={
+            !isBuy && {
+              value: isUseFiat
+                ? `${linkedAmount.amount} ${tokenSymbol}`
+                : `${currencySymbol}${linkedAmount.amount}`,
+              onPress: handleOnChangeAmountMode,
+            }
+          }
           inputProps={{
             placeholder: '0',
             ...(isUseFiat && {
@@ -930,9 +962,9 @@ function SendDataInputContainer() {
           {renderTokenDataInputForm()}
           {renderMemoForm()}
           {renderPaymentIdForm()}
-          {isUseFiat && form.watch('amount') && (
+          {isUseFiat && form.watch('amount') && maxFiatPrice > 0 && (
             <Text style={{ marginTop: 8 }}>
-              You will sell estimately{' '}
+              You will {isBuy ? 'receive' : 'sell'} estimately{' '}
               {Number(
                 ((Number(form.watch('amount')) + 0.02) / maxFiatPrice).toFixed(
                   2,
@@ -960,6 +992,8 @@ function SendDataInputContainer() {
         title={
           isSourceAccount
             ? 'Top Up'
+            : isBuy
+            ? 'Buy Crypto'
             : type === 'fiat'
             ? 'Crypto To Fiat Payment'
             : intl.formatMessage({ id: ETranslations.send_title })
@@ -1008,7 +1042,7 @@ function SendDataInputContainer() {
                 </ListItem>
               </Form.Field>
             ) : null}
-            {!isSourceAccount ? (
+            {!isSourceAccount && !isBuy ? (
               <Form.Field
                 label={intl.formatMessage({
                   id: ETranslations.global_recipient,
@@ -1052,7 +1086,9 @@ function SendDataInputContainer() {
       </Page.Body>
       <Page.Footer
         onConfirm={handleOnConfirm}
-        onConfirmText={type === 'fiat' ? 'Pay to Fiat' : 'Submit'}
+        onConfirmText={
+          type === 'fiat' ? (isBuy ? 'Buy' : 'Pay to Fiat') : 'Submit'
+        }
         confirmButtonProps={{
           disabled: isSubmitDisabled,
           loading: isSubmitting,
@@ -1067,7 +1103,7 @@ function SendDataInputContainer() {
             justifyContent: 'center',
           }}
         >
-          <ActivityIndicator />
+          <ActivityIndicator size={40} color={'white'} />
         </View>
       </Modal>
       <Modal transparent visible={!!transactionHash}>
