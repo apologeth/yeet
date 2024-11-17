@@ -38,8 +38,8 @@ export const getPresetNetworks = memoFn((): IServerNetwork[] => {
     'chainId': '170845',
     'code': 'x0',
     'id': 'evm--170845',
-    'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
-    'name': 'x0',
+    'logoURI': 'https://x0pay.com/images/logo-primary.png',
+    'name': 'x0 Network',
     'shortcode': 'x0',
     'shortname': 'x0',
     'feeMeta': {

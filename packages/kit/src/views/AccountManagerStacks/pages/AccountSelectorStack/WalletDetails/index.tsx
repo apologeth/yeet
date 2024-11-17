@@ -269,6 +269,7 @@ export function WalletDetails({ num }: IWalletDetailsProps) {
           isEmptyAddress: true,
         };
       }
+      console.log('JHAJA', address);
       return {
         address: address
           ? accountUtils.shortenAddress({
@@ -621,6 +622,8 @@ export function WalletDetails({ num }: IWalletDetailsProps) {
                     onSelect: async (tokenParam, networkParam) => {
                       // console.log(tokenItem, network);
                       // let r = {};
+                      console.log('tokenParam', tokenParam);
+                      console.log('networkParam', networkParam);
 
                       navigation.pushModal(EModalRoutes.SendModal, {
                         screen: EModalSendRoutes.SendDataInput,

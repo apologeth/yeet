@@ -137,6 +137,7 @@ function WalletActionPay() {
             val?.address === '0xC3c5D2D5fB6b6FE9948aB94Ce94c018C2B663939',
         )[0],
         type: 'fiat',
+        isPay: true,
       },
     });
   }, [
@@ -227,10 +228,10 @@ function WalletActions({ ...rest }: IXStackProps) {
 
   return (
     <RawActions {...rest}>
+      <WalletActionSwap networkId={network?.id} />
       <ReviewControl>
         <WalletActionBuy networkId={network?.id} accountId={account?.id} />
       </ReviewControl>
-      <WalletActionSwap networkId={network?.id} />
       <WalletActionPay />
       <WalletActionSend />
       <WalletActionReceive

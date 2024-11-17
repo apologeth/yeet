@@ -80,9 +80,9 @@ export default function MobileBottomTabBar({
   return (
     <Stack
       testID="Mobile-AppTabBar"
-      borderTopWidth={StyleSheet.hairlineWidth}
+      borderTopWidth={2}
       bg="$bgApp"
-      borderTopColor="$borderSubdued"
+      borderTopColor={'#23e525'}
       pb={bottom}
     >
       <Stack

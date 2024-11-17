@@ -428,6 +428,7 @@ export function TokenDetails() {
                   </XStack>
                   {/* Actions */}
                   <RawActions>
+                    <RawActions.Swap onPress={handleOnSwap} />
                     <ReviewControl>
                       <ActionBuy
                         networkId={networkId}
@@ -435,8 +436,6 @@ export function TokenDetails() {
                         tokenAddress={tokenInfo.address}
                       />
                     </ReviewControl>
-
-                    <RawActions.Swap onPress={handleOnSwap} />
 
                     <RawActions.Send onPress={handleSendPress} />
                     <RawActions.Receive onPress={handleReceivePress} />

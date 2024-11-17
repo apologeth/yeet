@@ -126,7 +126,10 @@ function TokenListContainer({
               return {
                 ...val,
                 '$key': `evm-170845_0x42e19b59fa5632c01b87666a400a002a695251d2_${val?.address}`,
-                'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
+                'logoURI':
+                  val.symbol === 'USDT'
+                    ? 'https://seeklogo.com/images/T/tether-usdt-logo-FA55C7F397-seeklogo.com.png'
+                    : 'https://uni.onekey-asset.com/static/chain/eth.png',
                 balance: balance,
               };
             }),
@@ -139,7 +142,7 @@ function TokenListContainer({
               'address': '0x0000000000000000000000000000000000000000',
               'decimals': 6,
               'isNative': false,
-              'logoURI': 'https://uni.onekey-asset.com/static/chain/eth.png',
+              'logoURI': 'https://x0pay.com/images/logo-primary.png',
               'name': 'x0',
               'riskLevel': 1,
               'symbol': 'x0',

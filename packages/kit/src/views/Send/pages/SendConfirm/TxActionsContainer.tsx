@@ -173,6 +173,36 @@ function TxActionsContainer(props: IProps) {
                 source={LogoBCA}
               />
             </View>
+            <View style={{ marginTop: 30 }}>
+              <Text
+                style={{
+                  color: 'white',
+                  marginBottom: 8,
+                }}
+              >
+                For Testnet version, to simulate the payment, please follow the
+                steps:
+              </Text>
+              <Text
+                style={{
+                  color: 'white',
+                }}
+              >
+                {[
+                  '1.⁠ ⁠Check your email,\n2.⁠ ⁠Copy your iPayMu ID,\n3.⁠ ⁠Go to',
+                  <Text
+                    style={{ color: '#2b83ff' }}
+                    onPress={() =>
+                      Linking.openURL('https://sandbox.ipaymu.com/notify')
+                    }
+                  >
+                    {' '}
+                    https://sandbox.ipaymu.com/notify
+                  </Text>,
+                  '\n4.⁠ ⁠Paste the ID to Sandbox Transaction ID,\n5.⁠ ⁠Click submit button',
+                ]}
+              </Text>
+            </View>
           </View>
         ) : (
           <View />

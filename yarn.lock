@@ -5664,6 +5664,7 @@ __metadata:
     metro: "npm:0.80.5"
     mipd: "npm:^0.0.7"
     mobile-detect: "npm:^1.4.5"
+    moment: "npm:^2.30.1"
     natsort: "npm:^2.0.3"
     node-notifier: "npm:^10.0.1"
     patch-package: "npm:^7.0.0"
@@ -24923,6 +24924,13 @@ __metadata:
   version: 9.3.1
   resolution: "mock-socket@npm:9.3.1"
   checksum: 10/c5c07568f2859db6926d79cb61580c07e67958b5cd6b52d1270fdfa17ae066d7f74a18a4208fc4386092eea4e1ee001aa23f015c88a1774265994e4fae34d18e
+  languageName: node
+  linkType: hard
+
+"moment@npm:^2.30.1":
+  version: 2.30.1
+  resolution: "moment@npm:2.30.1"
+  checksum: 10/ae42d876d4ec831ef66110bdc302c0657c664991e45cf2afffc4b0f6cd6d251dde11375c982a5c0564ccc0fa593fc564576ddceb8c8845e87c15f58aa6baca69
   languageName: node
   linkType: hard
 

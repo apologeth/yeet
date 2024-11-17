@@ -100,6 +100,11 @@ export function AmountInput({
         }}
         value={value}
         onChangeText={onChange}
+        onPress={() =>
+          !tokenSelectorTriggerProps?.selectedTokenSymbol
+            ? tokenSelectorTriggerProps?.onPress?.()
+            : null
+        }
         // maybe should replace with ref.current.setNativeProps({ selection })
         {...(platformEnv.isNativeAndroid && {
           selection,

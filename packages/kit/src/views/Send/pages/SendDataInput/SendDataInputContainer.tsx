@@ -92,6 +92,7 @@ function SendDataInputContainer() {
     isSourceAccount,
     sourceToken,
     isBuy,
+    isPay,
   } = route?.params;
 
   const [isUseFiat, setIsUseFiat] = useState(type === 'fiat');
@@ -392,7 +393,70 @@ function SendDataInputContainer() {
     }
   }, [transactionId]);
 
+  const handleTopUp = useCallback(async () => {
+    console.log('HUAA', sourceToken);
+    try {
+      setIsSubmitting(true);
+      const realAmount = amount;
+
+      let responseFiat;
+      if (isUseFiat) {
+        responseFiat = await axios.get(
+          'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+            realAmount,
+        );
+      }
+
+      const payload = {
+        'recepient': myAccount?.account_abstraction_address,
+        'amount': isUseFiat
+          ? responseFiat?.data?.data?.token_amount
+          : realAmount,
+        'privateKey':
+          '0x888ba851684c19a009e70da34f12c46c6633653bd418542eb338af3b47893947',
+      };
+
+      const response = await axios.post(
+        'https://langitapi.blockchainworks.id/api/transactions',
+        payload,
+      );
+    } catch (e: any) {
+      setIsSubmitting(false);
+
+      if (accountUtils.isWatchingAccount({ accountId: account?.id ?? '' })) {
+        throw new OneKeyError({
+          message: intl.formatMessage({
+            id: ETranslations.wallet_error_trade_with_watched_acocunt,
+          }),
+          autoToast: true,
+        });
+      }
+
+      throw new OneKeyError({
+        message: e.message,
+        autoToast: true,
+      });
+    }
+  }, [
+    account,
+    amount,
+    form,
+    intl,
+    isMaxSend,
+    isNFT,
+    isUseFiat,
+    linkedAmount.originalAmount,
+    nftAmount,
+    nftDetails,
+    sendConfirm,
+    tokenDetails,
+  ]);
+
   const handleOnConfirm = useCallback(async () => {
+    if (isPay) {
+      handleTopUp();
+      return;
+    }
     try {
       if (!myAccount?.account_abstraction_address) return;
       if (isSourceAccount) {
@@ -413,6 +477,7 @@ function SendDataInputContainer() {
       }
 
       try {
+        // '0x4a69f6F98EB7f7e66188F593F96ff905441Ae0D3'
         const payload = {
           'sender_address': myAccount?.account_abstraction_address,
           'receiver_address': isBuy ? myAccount?.email : toAddress,
@@ -431,7 +496,7 @@ function SendDataInputContainer() {
               ? null
               : activeToken?.address,
           'received_token_address': isBuy
-            ? '0x4a69f6F98EB7f7e66188F593F96ff905441Ae0D3'
+            ? null
             : activeToken?.address ===
               '0x0000000000000000000000000000000000000000'
             ? null
@@ -713,7 +778,7 @@ function SendDataInputContainer() {
         }}
       >
         {isUseFiat && (
-          <Text style={{ position: 'absolute', right: 0 }}>Using</Text>
+          <Text style={{ position: 'absolute', right: 0 }}>For</Text>
         )}
 
         <AmountInput

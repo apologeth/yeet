@@ -23,11 +23,13 @@ import { ETranslations } from '@onekeyhq/shared/src/locale';
 type IActionItemsProps = {
   icon?: IKeyOfIcons;
   label?: string;
+  disabled?: boolean;
 } & Partial<IButtonProps & IIconButtonProps>;
 
 function ActionItem({
   icon = 'PlaceholderOutline',
   label,
+  disabled = false,
   ...rest
 }: IActionItemsProps) {
   const media = useMedia();
@@ -42,6 +44,7 @@ function ActionItem({
           pr: '$0.5',
         })}
         {...rest}
+        disabled={disabled}
       >
         {label}
       </Button>
@@ -50,7 +53,7 @@ function ActionItem({
 
   return (
     <Stack alignItems="center">
-      <IconButton size="large" icon={icon} {...rest} />
+      <IconButton size="large" icon={icon} {...rest} disabled={disabled} />
       <SizableText
         mt="$2"
         textAlign="center"
@@ -67,17 +70,20 @@ function ActionItem({
 function ActionBuy(props: IActionItemsProps) {
   const intl = useIntl();
   return (
-    <ActionItem
-      label={"Topup"}
-      icon="PlusLargeOutline"
-      {...props}
-    />
+    <ActionItem label={'Topup'} icon="PlusLargeOutline" {...props} disabled />
+  );
+}
+
+function ActionWithdraw(props: IActionItemsProps) {
+  const intl = useIntl();
+  return (
+    <ActionItem label={'Topup'} icon="PlusLargeOutline" {...props} disabled />
   );
 }
 
 function ActionPay(props: IActionItemsProps) {
   const intl = useIntl();
-  return <ActionItem label={'Pay to Fiat'} icon="Rupiah" {...props} />;
+  return <ActionItem label={'Pay'} icon="Rupiah" {...props} />;
 }
 
 function ActionSell(props: IActionItemsProps) {
@@ -115,13 +121,7 @@ function ActionReceive(props: IActionItemsProps) {
 
 function ActionSwap(props: IActionItemsProps) {
   const intl = useIntl();
-  return (
-    <ActionItem
-      label={"Buy\nCrypto"}
-      icon="SwitchHorOutline"
-      {...props}
-    />
-  );
+  return <ActionItem label={'Buy'} icon="SwitchHorOutline" {...props} />;
 }
 
 function ActionMore({ sections }: { sections: IActionListProps['sections'] }) {
@@ -165,6 +165,7 @@ function RawActions({ children, ...rest }: IXStackProps) {
   );
 }
 
+RawActions.Withdraw = ActionWithdraw;
 RawActions.More = ActionMore;
 RawActions.Buy = ActionBuy;
 RawActions.Sell = ActionSell;

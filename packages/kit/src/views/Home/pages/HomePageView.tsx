@@ -143,7 +143,7 @@ export function HomePageView({
         initialScrollIndex={0}
         contentItemWidth={CONTENT_ITEM_WIDTH}
         contentWidth={screenWidth}
-        showsVerticalScrollIndicator={false}
+        // showsVerticalScrollIndicator={false}
       />
     ),
     [tabs, screenWidth],
