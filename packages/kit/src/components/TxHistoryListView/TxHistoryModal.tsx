@@ -229,10 +229,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textTitle: {
-    color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
-    color: 'white',
   },
   button: {
     borderRadius: 20,
@@ -247,17 +245,14 @@ const styles = StyleSheet.create({
     height: 40,
   },
   textStyle: {
-    color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
-    color: 'white',
   },
   logoText: {
     marginTop: 10,
     fontWeight: 'bold',
     textAlign: 'center',
     fontSize: 18,
-    color: 'white',
   },
   listDetail: {
     display: 'flex',
@@ -268,6 +263,5 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
-    color: 'white',
   },
 });
