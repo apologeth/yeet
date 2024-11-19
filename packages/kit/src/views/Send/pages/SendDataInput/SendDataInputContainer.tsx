@@ -495,12 +495,11 @@ function SendDataInputContainer() {
             '0x0000000000000000000000000000000000000000'
               ? null
               : activeToken?.address,
-          'received_token_address': isBuy
-            ? null
-            : activeToken?.address ===
-              '0x0000000000000000000000000000000000000000'
-            ? null
-            : activeToken?.address,
+          'received_token_address':
+            activeToken?.address ===
+            '0x0000000000000000000000000000000000000000'
+              ? null
+              : activeToken?.address,
           'shard_device': myAccount?.shard_device,
           transfer_type: isBuy
             ? null
@@ -516,6 +515,7 @@ function SendDataInputContainer() {
           type: isBuy ? 'BUY_TOKEN' : 'TRANSFER',
         };
         console.log('PAYLOADDD', payload);
+        console.log('activeToken', activeToken);
 
         const response = await axios.post(
           'https://langitapi.blockchainworks.id/api/transactions',
