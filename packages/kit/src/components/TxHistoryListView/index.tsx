@@ -108,7 +108,7 @@ function TxHistoryListView(props: IProps) {
       setLoading(true);
       console.log(myAccount?.access_token);
       const responseSent = await axios.get(
-        `https://langitapi.blockchainworks.id/api/transaction-history/sent?limit=${limit}`,
+        `https://straxapi.blockchainworks.id/api/transaction-history/sent?limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${myAccount?.access_token}`,
@@ -117,7 +117,7 @@ function TxHistoryListView(props: IProps) {
       );
 
       const responseReceived = await axios.get(
-        `https://langitapi.blockchainworks.id/api/transaction-history/received?limit=${limit}`,
+        `https://straxapi.blockchainworks.id/api/transaction-history/received?limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${myAccount?.access_token}`,

@@ -364,7 +364,7 @@ function SendDataInputContainer() {
       let trxInterval;
       const getTrxProcess = async () => {
         const responseTrx = await axios.get(
-          'https://langitapi.blockchainworks.id/api/transactions/' +
+          'https://straxapi.blockchainworks.id/api/transactions/' +
             transactionId,
         );
         console.log('RES', responseTrx?.data?.data);
@@ -402,7 +402,7 @@ function SendDataInputContainer() {
       let responseFiat;
       if (isUseFiat) {
         responseFiat = await axios.get(
-          'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+          'https://straxapi.blockchainworks.id/api/exchanges/token-amount/' +
             realAmount,
         );
       }
@@ -417,7 +417,7 @@ function SendDataInputContainer() {
       };
 
       const response = await axios.post(
-        'https://langitapi.blockchainworks.id/api/transactions',
+        'https://straxapi.blockchainworks.id/api/transactions',
         payload,
       );
     } catch (e: any) {
@@ -471,7 +471,7 @@ function SendDataInputContainer() {
       let responseFiat;
       if (isUseFiat || isBuy) {
         responseFiat = await axios.get(
-          'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+          'https://straxapi.blockchainworks.id/api/exchanges/token-amount/' +
             realAmount,
         );
       }
@@ -518,7 +518,7 @@ function SendDataInputContainer() {
         console.log('activeToken', activeToken);
 
         const response = await axios.post(
-          'https://langitapi.blockchainworks.id/api/transactions',
+          'https://straxapi.blockchainworks.id/api/transactions',
           payload,
         );
         console.log('SUCCESS SEND', response?.data);
@@ -723,7 +723,7 @@ function SendDataInputContainer() {
     setLoadingFiat(true);
     try {
       const response = await axios.get(
-        'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+        'https://straxapi.blockchainworks.id/api/exchanges/token-amount/' +
           price,
       );
       if (response?.data) {

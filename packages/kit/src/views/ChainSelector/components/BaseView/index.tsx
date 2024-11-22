@@ -106,9 +106,9 @@ const ListItemReal = ({ item, onPressItem, networkId, address }) => {
         const stringBalance = ethers.utils.formatEther(balance);
 
         const responseTokens = await axios.get(
-          'https://langitapi.blockchainworks.id/api/tokens/',
+          'https://straxapi.blockchainworks.id/api/tokens/',
         );
-        const langitTokens: any[] = await Promise.all(
+        const straxTokens: any[] = await Promise.all(
           responseTokens?.data?.data?.map(async (val) => {
             const balance = await getSTKBalance(val?.address, address);
             return {
@@ -136,11 +136,11 @@ const ListItemReal = ({ item, onPressItem, networkId, address }) => {
             'symbol': 'x0',
             'totalSupply': '',
           },
-          ...langitTokens,
+          ...straxTokens,
         ];
 
         const response = await axios.get(
-          'https://langitapi.blockchainworks.id/api/exchanges/token-amount/' +
+          'https://straxapi.blockchainworks.id/api/exchanges/token-amount/' +
             1,
         );
         const tokenMap = tokens?.reduce((acc, token) => {

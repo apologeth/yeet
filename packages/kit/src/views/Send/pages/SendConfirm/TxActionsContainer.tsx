@@ -80,7 +80,7 @@ function TxActionsContainer(props: IProps) {
       let trxInterval;
       const getTrxProcess = async () => {
         const responseTrx = await axios.get(
-          'https://langitapi.blockchainworks.id/api/transactions/' +
+          'https://straxapi.blockchainworks.id/api/transactions/' +
             transferPayload?.data?.transaction_id,
         );
         console.log('RESSSS', transferPayload, responseTrx?.data?.data);
@@ -113,7 +113,7 @@ function TxActionsContainer(props: IProps) {
   // const getData = async () => {
   //   try {
   //     const response = await axios.get(
-  //       'https://langitapi.blockchainworks.id/api/transactions/' +
+  //       'https://straxapi.blockchainworks.id/api/transactions/' +
   //         transferPayload?.data?.transaction_id,
   //     );
 
