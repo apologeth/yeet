@@ -106,7 +106,7 @@ const ListItemReal = ({ item, onPressItem, networkId, address }) => {
         const stringBalance = ethers.utils.formatEther(balance);
 
         const responseTokens = await axios.get(
-          'https://straxapi.blockchainworks.id/api/tokens/',
+          'https://mainnet.yeetpay.id/api/tokens/',
         );
         const straxTokens: any[] = await Promise.all(
           responseTokens?.data?.data?.map(async (val) => {
@@ -140,7 +140,7 @@ const ListItemReal = ({ item, onPressItem, networkId, address }) => {
         ];
 
         const response = await axios.get(
-          'https://straxapi.blockchainworks.id/api/exchanges/token-amount/' +
+          'https://mainnet.yeetpay.id/api/exchanges/token-amount/' +
             1,
         );
         const tokenMap = tokens?.reduce((acc, token) => {

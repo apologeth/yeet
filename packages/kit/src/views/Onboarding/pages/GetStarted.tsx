@@ -192,7 +192,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
       // const token = await GoogleSignin.getTokens();
 
       const responseToken = await axios.post(
-        'https://straxapi.blockchainworks.id/api/clients/login',
+        'https://mainnet.yeetpay.id/api/clients/login',
         {
           'email': 'soul@yopmail.com',
           'password': 'testclient',
@@ -200,7 +200,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
       );
 
       const response = await axios.post(
-        'https://straxapi.blockchainworks.id/api/accounts/recover',
+        'https://mainnet.yeetpay.id/api/accounts/recover',
         {
           email: userInfo?.user?.email,
           shard_email: values?.password,
@@ -213,7 +213,7 @@ function RecoveryInput({ userInfo, onClose }: any) {
       );
 
       const responseAccount = await axios.get(
-        'https://straxapi.blockchainworks.id/api/accounts/' +
+        'https://mainnet.yeetpay.id/api/accounts/' +
           response?.data?.data?.id,
         {
           headers: {
@@ -377,7 +377,7 @@ export function GetStarted({
       // const token = await GoogleSignin.getTokens();
       console.log('USER IFFO', userInfo);
       const responseToken = await axios.post(
-        'https://straxapi.blockchainworks.id/api/clients/login',
+        'https://mainnet.yeetpay.id/api/clients/login',
         {
           'email': 'soul@yopmail.com',
           'password': 'testclient',
@@ -387,7 +387,7 @@ export function GetStarted({
       console.log('LOGIN SCLIENT', responseToken?.data);
 
       const response = await axios.post(
-        'https://straxapi.blockchainworks.id/api/accounts/google-auth',
+        'https://mainnet.yeetpay.id/api/accounts/google-auth',
         {
           google_code: userInfo?.data?.serverAuthCode,
           fiat_wallet_id: '0000000816222512',
@@ -402,7 +402,7 @@ export function GetStarted({
       console.log('LOGIN GOOGLE AUTH', response?.data);
 
       const responseAccount = await axios.get(
-        'https://straxapi.blockchainworks.id/api/accounts/' +
+        'https://mainnet.yeetpay.id/api/accounts/' +
           response?.data?.data?.id,
         {
           headers: {
