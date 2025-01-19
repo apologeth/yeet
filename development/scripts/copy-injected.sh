@@ -21,5 +21,5 @@ rsync ./node_modules/@onekeyfe/hd-web-sdk/build/ ./apps/desktop/public/static/js
 
 # build and copy web-embed
 BASEDIR=$(dirname "$0")
-node "${BASEDIR}/web-embed.js"
+#node "${BASEDIR}/web-embed.js"
 
