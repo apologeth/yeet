@@ -1,5 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+
 buildscript {
     ext {
         buildToolsVersion = findProperty('android.buildToolsVersion') ?: '34.0.0'
@@ -21,6 +22,14 @@ buildscript {
         classpath('com.android.tools.build:gradle')
         classpath('com.facebook.react:react-native-gradle-plugin')
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            force 'com.google.http-client:google-http-client:1.40.1' // Replace with the desired compatible library
+            exclude group: 'commons-logging', module: 'commons-logging'
+        }
     }
 }
 
