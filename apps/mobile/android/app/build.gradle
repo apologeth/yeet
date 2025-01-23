@@ -81,13 +81,13 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    compileSdk rootProject.ext.compileSdkVersion
-
-    namespace 'com.xo.app'
+    compileSdk 34
+    compileSdkVersion 34
+    namespace 'id.yeetpay.app'
     defaultConfig {
-        applicationId 'com.xo.app'
+        applicationId 'id.yeetpay.app'
         minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0.0"
 
@@ -104,11 +104,11 @@ android {
     }
     buildTypes {
         debug {
-            resValue "string", "app_name", "x0 Dev"
+            resValue "string", "app_name", "YEET"
             signingConfig signingConfigs.debug
         }
         release {
-            resValue "string", "app_name", "x0"
+            resValue "string", "app_name", "YEET"
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
