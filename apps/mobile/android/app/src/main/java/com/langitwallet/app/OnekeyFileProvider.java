@@ -1,4 +1,4 @@
-package com.xo.app;
+package id.yeetpay.app;
 
 import android.content.Context;
 import android.net.Uri;
