@@ -51,12 +51,12 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="onekey-wallet"/>
-        <data android:scheme="com.xo.app"/>
+        <data android:scheme="id.yeetpay.app"/>
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
       <provider
-          android:name="com.xo.app.OnekeyFileProvider"
+          android:name="id.yeetpay.app.OnekeyFileProvider"
           android:authorities="${applicationId}.onekeyfile"
           android:exported="false"
           android:grantUriPermissions="true">
